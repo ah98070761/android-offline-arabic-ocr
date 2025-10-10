@@ -1,47 +1,41 @@
 workflows:
   android-build:
     name: Android Build
-    instance_type: mac_mini_m1 # Recommended for Android builds on Codemagic
-    max_build_duration: 60 # Set a maximum build duration in minutes
-
-    trigger:
-      branch: main # Build on pushes to the 'main' branch
+    instance_type: mac_mini_m1
+    max_build_duration: 60
 
     environment:
-      android_sdk: latest # Use the latest Android SDK available on Codemagic
-      java: openjdk17 # Use OpenJDK 17 for modern Android development
+      java: openjdk17
 
     scripts:
       - name: Create tessdata directory
-        run: |
+        script: |
           mkdir -p app/src/main/assets/tessdata
 
       - name: Download Tesseract Arabic traineddata
-        run: |
+        script: |
           curl -L -o app/src/main/assets/tessdata/ara.traineddata https://github.com/tesseract-ocr/tessdata_fast/raw/main/ara.traineddata
 
       - name: Run Android Lint
-        run: |
+        script: |
           ./gradlew lintRelease
 
       - name: Build Android Release APK
-        run: |
+        script: |
           ./gradlew assembleRelease
 
       - name: Build Android Release AAB
-        run: |
+        script: |
           ./gradlew bundleRelease
 
     artifacts:
       - app/build/outputs/apk/**/*.apk
       - app/build/outputs/bundle/**/*.aab
-      - app/build/reports/**/*.xml # Include lint and test reports
+      - app/build/reports/**/*.xml
 
     publishing:
       email:
         recipients:
-          - your.email@example.com # Replace with your email address
-        success:
-          enabled: true
-        failure:
-          enabled: true
+          - your.email@example.com
+        notify_success: true
+        notify_failure: true
