@@ -7,8 +7,10 @@ workflows:
     environment:
       java: 11
 
-    # Set the working directory to the repository root where gradlew is located
-    working_directory: . 
+    # Corrected: Set the working directory to the subdirectory where gradlew is located.
+    # This typically resolves "gradlew: No such file or directory" when the Android project
+    # is not in the repository root, but in a subfolder like 'android'.
+    working_directory: android 
 
     scripts:
       - name: Grant execute permissions to gradlew
