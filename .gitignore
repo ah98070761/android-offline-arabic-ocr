@@ -1,0 +1,58 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+*.aar
+
+# Files for the art/design team
+captures/
+
+# Files for the build system
+.gradle/
+/local.properties
+.DS_Store
+/build/
+/app/build/
+
+# Gradle files
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+.gradle/
+
+# Android Studio and IntelliJ IDEA files
+.idea/
+*.iml
+*.iws
+*.ipr
+.externalNativeBuild/
+.cxx/
+gen/
+out/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Local configuration files (e.g., for CI/CD)
+upload-keys.properties
+crashlytics-build.properties
+
+# Proguard/R8 files
+proguard-project.txt
+
+# Misc
+*.log
+*.bak
+*.swp
+*~
+*.swo
+
+# macOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+
+# Tesseract traineddata files downloaded from external sources (optional, if you don't want to commit them)
+# If you want to commit ara.traineddata as per README, do NOT uncomment the line below.
+# app/src/main/assets/tessdata/*.traineddata
