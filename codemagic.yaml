@@ -8,6 +8,10 @@ workflows:
       java: 11
 
     scripts:
+      - name: Grant execute permissions to gradlew
+        script: |
+          chmod +x gradlew
+
       - name: Create tessdata directory
         script: |
           mkdir -p app/src/main/assets/tessdata
