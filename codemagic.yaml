@@ -37,5 +37,3 @@ workflows:
       email:
         recipients:
           - your.email@example.com
-        notify_success: true
-        notify_failure: true
