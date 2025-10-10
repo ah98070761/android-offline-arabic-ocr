@@ -15,7 +15,7 @@ workflows:
     scripts:
       - name: Grant execute permissions to gradlew
         script: |
-          chmod +x gradlew
+          find . -name gradlew -exec chmod +x {} \;
 
       - name: Create tessdata directory
         script: |
