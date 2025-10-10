@@ -7,6 +7,9 @@ workflows:
     environment:
       java: 11
 
+    # Set the working directory to the repository root where gradlew is located
+    working_directory: . 
+
     scripts:
       - name: Grant execute permissions to gradlew
         script: |
