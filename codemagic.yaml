@@ -15,7 +15,8 @@ workflows:
     scripts:
       - name: Download missing Gradle Wrapper JAR
         script: |
-          curl -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar
+          mkdir -p gradle/wrapper
+          curl -L -k -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar
 
       - name: Grant execute permissions to gradlew
         script: |
