@@ -1,0 +1,127 @@
+package com.example.ocr
+
+import android.content.Context
+import android.graphics.Bitmap
+import com.googlecode.tesseract.android.TessBaseAPI
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+
+/**
+ * Manages the Tesseract OCR engine for performing text recognition.
+ * It handles the initialization of Tesseract, copying language data,
+ * and executing OCR on a given bitmap.
+ */
+class OcrManager(private val context: Context) {
+
+    private var tessBaseApi: TessBaseAPI? = null
+
+    // Base path for Tesseract data (e.g., /data/data/com.example.ocr/files/tesseract/)
+    private val DATA_PATH: String = context.filesDir.absolutePath + "/tesseract/"
+    // Path to the tessdata directory (e.g., /data/data/com.example.ocr/files/tesseract/tessdata/)
+    private val TESSDATA_PATH: String = DATA_PATH + "tessdata/"
+    // Language code for Arabic
+    private val LANG = "ara"
+
+    init {
+        prepareTesseract()
+    }
+
+    /**
+     * Prepares the Tesseract engine by ensuring the tessdata directory exists
+     * and the traineddata file is copied, then initializes TessBaseAPI.
+     */
+    private fun prepareTesseract() {
+        try {
+            // Create the tessdata directory if it doesn't exist
+            val dir = File(TESSDATA_PATH)
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+            // Copy the trained data file from assets to internal storage
+            copyTrainedData()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Log or handle the error appropriately, e.g., show a toast to the user
+            // Log.e("OcrManager", "Error preparing Tesseract directories or copying data", e)
+        }
+
+        tessBaseApi = TessBaseAPI()
+        // Initialize TessBaseAPI with the data path and language code.
+        // The data path should point to the parent directory of the 'tessdata' folder.
+        val success = tessBaseApi?.init(DATA_PATH, LANG)
+        if (success == false) {
+            // Handle initialization failure
+            tessBaseApi?.end() // Release resources if init fails
+            tessBaseApi = null
+            // Log error or notify user about initialization failure
+            // Log.e("OcrManager", "Failed to initialize Tesseract with language: $LANG")
+        } else {
+            // Optional: Set page segmentation mode for better OCR results.
+            // PSM_AUTO is a good general purpose mode.
+            tessBaseApi?.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO)
+            // Optional: Set variable for right-to-left text for Arabic
+            tessBaseApi?.setVariable(TessBaseAPI.VAR_TRAINING_DPI, "300") // Set DPI for better recognition
+            tessBaseApi?.setVariable("textord_tabfind_show_images", "true") // This might help with RTL
+        }
+    }
+
+    /**
+     * Copies the `ara.traineddata` file from the app's assets folder
+     * to the internal storage's tessdata directory.
+     * This is crucial for Tesseract to function offline.
+     */
+    private fun copyTrainedData() {
+        val trainedDataFile = File(TESSDATA_PATH, "$LANG.traineddata")
+        // Only copy if the file does not already exist
+        if (!trainedDataFile.exists()) {
+            try {
+                // Open the asset file
+                context.assets.open("tessdata/$LANG.traineddata").use { inputStream ->
+                    // Create an output stream to the destination file
+                    FileOutputStream(trainedDataFile).use { outputStream ->
+                        inputStream.copyTo(outputStream) // Copy the file
+                    }
+                }
+                // Log.d("OcrManager", "Successfully copied trained data for $LANG")
+            } catch (e: IOException) {
+                e.printStackTrace()
+                // Log or handle the error during file copying
+                // Log.e("OcrManager", "Error copying trained data for $LANG", e)
+            }
+        }
+    }
+
+    /**
+     * Performs OCR on the given [bitmap] and returns the recognized text.
+     * This is a suspend function and should be called from a coroutine.
+     *
+     * @param bitmap The image bitmap to perform OCR on.
+     * @return The recognized text, or an error message if OCR fails or engine is not initialized.
+     */
+    suspend fun performOcr(bitmap: Bitmap): String = withContext(Dispatchers.Default) {
+        if (tessBaseApi == null) {
+            return@withContext "OCR engine not initialized. Please ensure language data is available."
+        }
+        try {
+            tessBaseApi?.setImage(bitmap) // Set the image for OCR
+            val result = tessBaseApi?.utF8Text // Get the recognized text
+            tessBaseApi?.clear() // Clear image data after processing to free memory
+            return@withContext result ?: "No text found."
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return@withContext "OCR Error: ${e.message}"
+        }
+    }
+
+    /**
+     * Releases the Tesseract resources. This should be called when the OCR manager
+     * is no longer needed, typically in the onDestroy lifecycle method of an Activity or Fragment.
+     */
+    fun stopTesseract() {
+        tessBaseApi?.end() // Release TessBaseAPI resources
+        tessBaseApi = null
+    }
+}
