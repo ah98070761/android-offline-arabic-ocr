@@ -7,7 +7,7 @@ workflows:
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
-        # تحديد المسار الصحيح لمخزن Gradle Cache
+        # تحديد المسار الصحيح لمخبأ Gradle Cache
         GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle 
       
     triggering:
@@ -23,7 +23,6 @@ workflows:
           include: true
     
     scripts:
-      # 1: إعداد SDK
       - name: Set up Android SDK
         script: |
           SDK_MANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
@@ -32,17 +31,14 @@ workflows:
           yes | $SDK_MANAGER "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
           yes | $SDK_MANAGER --licenses
       
-      # 2: منح الأذونات (ضروري دائمًا)
-      - name: Grant gradlew permission (MANDATORY)
+      - name: Grant gradlew permission
         script: |
+          # هذه الخطوة ستنجح الآن لأنك قمت بإضافة الملف gradle-wrapper.jar
           chmod +x gradlew
           
-      # 3: تشغيل أول أمر Gradle (سيقوم هذا الأمر الآن بتنزيل ملف ZIP الكامل 9.1.0 تلقائياً)
-      # إذا كان ملف gradlew نفسه مفقودًا، يجب على المستخدم التأكد من وجوده في المشروع.
-      - name: Download and Set up Gradle Distribution (Triggered by Wrapper)
+      - name: Download and Set up Gradle Distribution
         script: |
-          # نستخدم أمر بسيط لـ Gradle. إذا كان ملف gradle-wrapper.properties مُعدًا لاستخدام 9.1.0، فسيتم تنزيله هنا.
-          # هذا هو المكان الذي سيتم فيه تنزيل ملف ZIP (gradle-9.1.0-bin.zip)
+          # هذا الأمر سيقوم بتشغيل الـ Wrapper، الذي سيقوم بتنزيل ملف ZIP الكامل (9.1.0) تلقائياً، وتثبيته، والبدء في بناء التبعيات.
           ./gradlew dependencies --no-daemon
           
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
