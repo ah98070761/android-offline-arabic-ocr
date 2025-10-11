@@ -1,20 +1,15 @@
-# Fix: Final complete YAML with the 'cache' section entirely removed to resolve structural errors.
+# Fix: Final YAML, removing the unnecessary and failing 'Set up Java' script step.
 workflows:
   android-build:
     name: Android Build and Release
     environment:
       vars:
-        CM_JAVA_VERSION: 17
+        CM_JAVA_VERSION: 17 # Codemagic uses this variable automatically
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
-        # نحتفظ بـ GRADLE_USER_HOME كمتغير بيئة حتى بدون التخزين المؤقت
         GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle 
-      # groups:
-      #   - google_play_credentials 
-    
-    # قسم cache محذوف بالكامل
-    
+      
     triggering:
       events:
         - push
@@ -28,12 +23,8 @@ workflows:
           include: true
     
     scripts:
-      - name: Set up Java
-        script: |
-          echo "Setting up Java $CM_JAVA_VERSION"
-          sdk install java $CM_JAVA_VERSION
-          sdk use java $CM_JAVA_VERSION
-
+      # تم حذف خطوة 'Set up Java' بالكامل لأن Codemagic يقوم بها تلقائيًا بناءً على vars
+      
       # 1: إعداد SDK
       - name: Set up Android SDK
         script: |
@@ -55,8 +46,8 @@ workflows:
         script: |
           ./gradlew lintRelease
           ./gradlew bundleRelease
-          ./gradlew assembleRelease # إضافة assembleRelease لضمان إنشاء APK
-
+          ./gradlew assembleRelease
+          
       - name: List build outputs
         script: |
           ls -R app/build/outputs
@@ -73,9 +64,3 @@ workflows:
         notify:
           success: true
           failure: false
-      # google_play:
-      #   credentials: $GOOGLE_PLAY_CREDENTIALS
-      #   track: internal
-      #   mapping_file: build/outputs/mapping/release/mapping.txt
-      #   from_aab: true
-      #   service_account_key_file: $CM_BUILD_DIR/google_play_credentials.json
