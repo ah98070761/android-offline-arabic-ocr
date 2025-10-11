@@ -60,8 +60,8 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
-    // الإصلاح الأخير: استخدام صيغة module() لتجنب خطأ التوافق في Gradle 9.1.0
-    implementation(module("com.rmtheis:tess-two:9.1.0")) // يجب استخدام هذه الصيغة
+    // العودة إلى صيغة التبعية القياسية، والتي ستعمل مع Gradle 8.8
+    implementation("com.rmtheis:tess-two:9.1.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
