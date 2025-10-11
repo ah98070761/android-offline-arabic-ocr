@@ -1,5 +1,4 @@
-# Fix: Final YAML, combining the working JAR download (5.6.4) to enable gradlew, 
-# and then forcing gradlew to update to the desired 9.1.0 version (which uses the reliable ZIP distribution).
+# Fix: Final YAML - Removing all failed JAR downloads. Directly downloading and extracting the full Gradle 9.1.0-bin.zip.
 workflows:
   android-build:
     name: Android Build and Release
@@ -38,23 +37,24 @@ workflows:
         script: |
           mkdir -p gradle/wrapper
           
-      # 3: الإصلاح: تنزيل JAR قديم ومستقر (5.6.4) لتمكين gradlew. (الأمر الذي فشل سابقًا سيعمل الآن لأن الـ JAR متاح)
-      - name: Download Stable Gradle Wrapper JAR (5.6.4)
+      # 3: الإصلاح الجذري: تنزيل ZIP الثنائي لـ Gradle 9.1.0
+      - name: Download and Extract Gradle 9.1.0 Distribution ZIP
         script: |
-          # نستخدم رابط 5.6.4 لأنه موثوق به لتنزيل الـ JAR الصغير
-          curl -f -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-5.6.4-wrapper.jar
-      
+          # تنزيل ملف الـ ZIP الثنائي الكامل مباشرة
+          curl -f -L -o gradle.zip https://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+          
+          # فك ضغط الملف داخل مجلد gradle/wrapper
+          unzip gradle.zip -d gradle/wrapper
+          
+          # نقل محتويات مجلد gradle-9.1.0 إلى gradle/wrapper
+          mv gradle/wrapper/gradle-9.1.0/lib/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
+          
       # 4: منح الأذونات
       - name: Grant gradlew permission
         script: |
           chmod +x gradlew
-      
-      # 5: تحديث الـ Wrapper إلى 9.1.0 (سيقوم الـ JAR الذي تم تنزيله بتنزيل ZIP 9.1.0-bin.zip الجديد)
-      - name: Update Gradle Distribution to 9.1.0 (Using Wrapper)
-        script: |
-          # هذا هو الأمر الذي يستخدم الـ JAR الذي تم تنزيله لتنزيل ملف ZIP الكامل 9.1.0
-          ./gradlew wrapper --gradle-version 9.1.0
           
+      # 5: تشغيل البناء (لن تحتاج هذه الخطوة إلى التنزيل مرة أخرى)
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
         script: |
           ./gradlew lintRelease
