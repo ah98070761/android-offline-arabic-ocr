@@ -33,11 +33,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        // تم التحديث إلى Java 17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        // تم التحديث إلى Java 17
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding = true
@@ -59,10 +61,9 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
-    // Tesseract OCR library (tess-two wrapper)
-    implementation("com.rmtheis:tess-two:9.1.0")
+    // تم إصلاح طريقة تعريف تبعية Tess-Two لحل خطأ DependencyHandler.module
+    implementation(group = "com.rmtheis", name = "tess-two", version = "9.1.0")
 
-    // Kotlin Coroutines for asynchronous operations
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     testImplementation("junit:junit:4.13.2")
