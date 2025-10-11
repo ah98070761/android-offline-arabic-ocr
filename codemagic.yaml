@@ -16,7 +16,7 @@ workflows:
     # تم تبسيط cache لأقصى درجة، كقائمة مباشرة تحت المفتاح
     cache: # يجب أن تكون المسافة البادئة هنا دائمًا صحيحة!
       - $GRADLE_USER_HOME
-      - $CM_BUILD_DIR/.android/build-cache
+        - $CM_BUILD_DIR/.android/build-cache
       
     triggering:
       events:
