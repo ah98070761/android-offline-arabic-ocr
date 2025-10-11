@@ -1,71 +1,11 @@
+// build.gradle.kts (ملف الجذر)
+
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    // يجب تحديد الإصدار هنا (AGP 8.1.0، Kotlin 1.9.0)
+    // نستخدم إصدارات مستقرة. إذا كان لديك متطلبات أخرى، قم بالتحديث.
+    id("com.android.application") version "8.1.0" apply false 
+    id("com.android.library") version "8.1.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.0" apply false
 }
 
-android {
-    namespace = "com.example.ocr"
-    compileSdk = 34
-
-    defaultConfig {
-        applicationId = "com.example.ocr"
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        viewBinding = true
-        compose = false // Assuming no Jetpack Compose for now
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-}
-
-dependencies {
-
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.activity:activity-ktx:1.8.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-
-    // Tesseract OCR library (tess-two wrapper)
-    // Note: Make sure to check for the latest stable version or alternatives if needed.
-    // This library might require specific NDK setup if compiling from source,
-    // but using the pre-built AAR usually simplifies things.
-    implementation("com.rmtheis:tess-two:9.1.0")
-
-    // Kotlin Coroutines for asynchronous operations
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-}
+// لا تضع أي كود آخر لـ Android أو Dependencies في هذا الملف
