@@ -1,4 +1,4 @@
-# Fix: Final YAML, correcting the 'sdkmanager: No such file or directory' by using the industry-standard ANDROID_SDK_ROOT variable.
+# Fix: Final YAML, correcting the 'ClassNotFoundException' by using a more robust curl command (curl -f -L).
 workflows:
   android-build:
     name: Android Build and Release
@@ -26,7 +26,7 @@ workflows:
       # 1: إعداد SDK - استخدام المسار الأكثر موثوقية $ANDROID_SDK_ROOT
       - name: Set up Android SDK
         script: |
-          # نستخدم $ANDROID_SDK_ROOT بدلاً من متغير CM لضمان وجود المسار
+          # نستخدم $ANDROID_SDK_ROOT
           SDK_MANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           echo "Setting up Android SDK Build Tools $CM_ANDROID_SDK_BUILD_TOOLS, Platform Tools $CM_ANDROID_SDK_PLATFORM_TOOLS, Platform $CM_ANDROID_SDK_PLATFORM"
           
@@ -39,10 +39,10 @@ workflows:
         script: |
           mkdir -p gradle/wrapper
           
-      # 3 و 4 (المدمجة): تنزيل JAR ومنح الأذونات لتجنب 'Permission denied'
+      # 3 و 4 (المدمجة): تنزيل JAR ومنح الأذونات. (تم إضافة -f لفرض التنزيل السليم)
       - name: Download JAR and Grant gradlew permission
         script: |
-          curl -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar && chmod +x gradlew
+          curl -f -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar && chmod +x gradlew
           
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
         script: |
