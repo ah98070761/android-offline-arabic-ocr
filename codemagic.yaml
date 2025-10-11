@@ -1,5 +1,5 @@
-# Fix: Final YAML, removing the manual JAR download and relying on the existing gradlew script
-# to fetch the full Gradle distribution ZIP (7.2), which is more stable.
+# Fix: Final YAML, combining the working JAR download (5.6.4) to enable gradlew, 
+# and then forcing gradlew to update to the desired 9.1.0 version (which uses the reliable ZIP distribution).
 workflows:
   android-build:
     name: Android Build and Release
@@ -38,17 +38,22 @@ workflows:
         script: |
           mkdir -p gradle/wrapper
           
-      # 3: منح الأذونات فقط. (تم حذف خطوة التنزيل اليدوية الفاشلة)
-      - name: Grant gradlew permission (Ensure gradlew is executable)
+      # 3: الإصلاح: تنزيل JAR قديم ومستقر (5.6.4) لتمكين gradlew. (الأمر الذي فشل سابقًا سيعمل الآن لأن الـ JAR متاح)
+      - name: Download Stable Gradle Wrapper JAR (5.6.4)
+        script: |
+          # نستخدم رابط 5.6.4 لأنه موثوق به لتنزيل الـ JAR الصغير
+          curl -f -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-5.6.4-wrapper.jar
+      
+      # 4: منح الأذونات
+      - name: Grant gradlew permission
         script: |
           chmod +x gradlew
       
-      # 4: إعادة تشغيل الـ Wrapper لتنزيل ZIP الخاص بـ Gradle (هذا يحل مشكلة ClassNotFound)
-      - name: Download Gradle Distribution (Using Wrapper)
+      # 5: تحديث الـ Wrapper إلى 9.1.0 (سيقوم الـ JAR الذي تم تنزيله بتنزيل ZIP 9.1.0-bin.zip الجديد)
+      - name: Update Gradle Distribution to 9.1.0 (Using Wrapper)
         script: |
-          # هذه الخطوة تجعل gradlew ينزل ملف gradle-7.2-bin.zip (أو ما تم تحديده في gradle-wrapper.properties)
-          # هذا هو الإصلاح لـ "ClassNotFoundException"
-          ./gradlew wrapper --gradle-version 7.2
+          # هذا هو الأمر الذي يستخدم الـ JAR الذي تم تنزيله لتنزيل ملف ZIP الكامل 9.1.0
+          ./gradlew wrapper --gradle-version 9.1.0
           
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
         script: |
