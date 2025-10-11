@@ -1,10 +1,10 @@
-# Fix: Final YAML, removing the unnecessary and failing 'Set up Java' script step.
+# Fix: Final YAML, correcting the 'sdkmanager: command not found' by using its explicit path.
 workflows:
   android-build:
     name: Android Build and Release
     environment:
       vars:
-        CM_JAVA_VERSION: 17 # Codemagic uses this variable automatically
+        CM_JAVA_VERSION: 17
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
@@ -23,14 +23,15 @@ workflows:
           include: true
     
     scripts:
-      # تم حذف خطوة 'Set up Java' بالكامل لأن Codemagic يقوم بها تلقائيًا بناءً على vars
-      
-      # 1: إعداد SDK
+      # متغير Codemagic لـ SDK Command Line Tools
       - name: Set up Android SDK
         script: |
+          SDK_MANAGER="$CM_ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           echo "Setting up Android SDK Build Tools $CM_ANDROID_SDK_BUILD_TOOLS, Platform Tools $CM_ANDROID_SDK_PLATFORM_TOOLS, Platform $CM_ANDROID_SDK_PLATFORM"
-          yes | sdkmanager "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
-          yes | sdkmanager --licenses
+          
+          # استخدام المسار الصريح لـ sdkmanager
+          yes | $SDK_MANAGER "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
+          yes | $SDK_MANAGER --licenses
       
       # 2: إنشاء المجلد
       - name: Create Gradle Wrapper directory
