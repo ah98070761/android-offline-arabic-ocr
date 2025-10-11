@@ -1,4 +1,4 @@
-# Fix: Final clean YAML to solve all structural errors (GRADLE_USER_HOME and cache dict error)
+# Fix: Final clean YAML to solve all structural errors including the 'cache: value is not a valid dict' error.
 workflows:
   android-build:
     name: Android Build and Release
@@ -13,10 +13,11 @@ workflows:
       # groups:
       #   - google_play_credentials 
     
-    # تم تغيير cache إلى صيغة القائمة البسيطة التي تقبل المسارات
+    # تم تغيير cache إلى بنية القاموس (Dict) المطلوبة من Codemagic
     cache:
-      - $GRADLE_USER_HOME
-      - $CM_BUILD_DIR/.android/build-cache
+      paths: # هذا هو المفتاح المفقود الذي يجعلها "Valid Dict"
+        - $GRADLE_USER_HOME
+        - $CM_BUILD_DIR/.android/build-cache
       
     triggering:
       events:
@@ -43,7 +44,6 @@ workflows:
           yes | sdkmanager "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
           yes | sdkmanager --licenses
       
-      # FIX: تم فصل الأوامر لضمان عدم فشل mkdir
       - name: Create Gradle Wrapper directory
         script: |
           mkdir -p gradle/wrapper
