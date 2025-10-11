@@ -10,12 +10,6 @@ workflows:
         CM_ANDROID_SDK_PLATFORM: 34
         GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle
 
-    cache:
-      paths:
-        - ~/.gradle/caches
-        - ~/.gradle/wrapper
-        - $CM_BUILD_DIR/.android/build-cache
-
     triggering:
       events:
         - push
