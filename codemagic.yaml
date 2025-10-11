@@ -1,15 +1,20 @@
+# Fix: Final complete YAML with the 'cache' section entirely removed to resolve structural errors.
 workflows:
   android-build:
     name: Android Build and Release
-
     environment:
       vars:
         CM_JAVA_VERSION: 17
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
-        GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle
-
+        # نحتفظ بـ GRADLE_USER_HOME كمتغير بيئة حتى بدون التخزين المؤقت
+        GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle 
+      # groups:
+      #   - google_play_credentials 
+    
+    # قسم cache محذوف بالكامل
+    
     triggering:
       events:
         - push
@@ -21,20 +26,56 @@ workflows:
           include: true
         - pattern: feature/.*
           include: true
-
+    
     scripts:
       - name: Set up Java
         script: |
-          echo "Using Java version $CM_JAVA_VERSION"
+          echo "Setting up Java $CM_JAVA_VERSION"
+          sdk install java $CM_JAVA_VERSION
+          sdk use java $CM_JAVA_VERSION
 
-      - name: Build Android APK
+      # 1: إعداد SDK
+      - name: Set up Android SDK
         script: |
-          ./gradlew assembleRelease
+          echo "Setting up Android SDK Build Tools $CM_ANDROID_SDK_BUILD_TOOLS, Platform Tools $CM_ANDROID_SDK_PLATFORM_TOOLS, Platform $CM_ANDROID_SDK_PLATFORM"
+          yes | sdkmanager "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
+          yes | sdkmanager --licenses
+      
+      # 2: إنشاء المجلد
+      - name: Create Gradle Wrapper directory
+        script: |
+          mkdir -p gradle/wrapper
+          
+      # 3 و 4 (المدمجة): تنزيل JAR ومنح الأذونات لتجنب 'Permission denied'
+      - name: Download JAR and Grant gradlew permission
+        script: |
+          curl -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar && chmod +x gradlew
+          
+      - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
+        script: |
+          ./gradlew lintRelease
+          ./gradlew bundleRelease
+          ./gradlew assembleRelease # إضافة assembleRelease لضمان إنشاء APK
 
       - name: List build outputs
         script: |
           ls -R app/build/outputs
-
+          
     artifacts:
-      - app/build/outputs/**/*.apk
-      - app/build/outputs/**/*.aab
+      - build/app/outputs/**/*.aab
+      - build/app/outputs/**/*.apk
+      - build/reports/**/*.html
+      
+    publishing:
+      email:
+        recipients:
+          - your_email@example.com
+        notify:
+          success: true
+          failure: false
+      # google_play:
+      #   credentials: $GOOGLE_PLAY_CREDENTIALS
+      #   track: internal
+      #   mapping_file: build/outputs/mapping/release/mapping.txt
+      #   from_aab: true
+      #   service_account_key_file: $CM_BUILD_DIR/google_play_credentials.json
