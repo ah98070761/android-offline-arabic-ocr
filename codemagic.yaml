@@ -1,3 +1,4 @@
+# Fix: Final clean YAML to solve all structural errors (GRADLE_USER_HOME and cache dict error)
 workflows:
   android-build:
     name: Android Build and Release
@@ -7,12 +8,16 @@ workflows:
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
-        GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle # تم نقلها هنا لحل مشكلة 'extra fields'
+        # تعريف مسار Gradle Cache كمتغير بيئة هنا
+        GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle 
       # groups:
-      #   - google_play_credentials # Add this if you plan to publish to Google Play
+      #   - google_play_credentials 
+    
+    # تم تغيير cache إلى صيغة القائمة البسيطة التي تقبل المسارات
     cache:
-      - $CM_BUILD_DIR/.gradle
+      - $GRADLE_USER_HOME
       - $CM_BUILD_DIR/.android/build-cache
+      
     triggering:
       events:
         - push
@@ -24,37 +29,44 @@ workflows:
           include: true
         - pattern: feature/.*
           include: true
+    
     scripts:
       - name: Set up Java
         script: |
           echo "Setting up Java $CM_JAVA_VERSION"
           sdk install java $CM_JAVA_VERSION
           sdk use java $CM_JAVA_VERSION
+      
       - name: Set up Android SDK
         script: |
           echo "Setting up Android SDK Build Tools $CM_ANDROID_SDK_BUILD_TOOLS, Platform Tools $CM_ANDROID_SDK_PLATFORM_TOOLS, Platform $CM_ANDROID_SDK_PLATFORM"
           yes | sdkmanager "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
           yes | sdkmanager --licenses
+      
+      # FIX: تم فصل الأوامر لضمان عدم فشل mkdir
       - name: Create Gradle Wrapper directory
         script: |
-          # هذه الخطوة لضمان إنشاء المسار قبل التنزيل
           mkdir -p gradle/wrapper
+          
       - name: Download missing Gradle Wrapper JAR
         script: |
-          # هذا هو أمر التنزيل الذي فشل مراراً، أصبح في خطوة منفصلة الآن
           curl -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar
+          
       - name: Grant execute permission to gradlew
         script: |
           chmod +x gradlew
+          
       - name: Run Android Lint and Build Android Release Bundle
         script: |
           ./gradlew lintRelease
           ./gradlew bundleRelease
+          
     artifacts:
       - build/app/outputs/**/*.aab
       - build/app/outputs/**/*.apk
       - build/app/outputs/**/*.json
       - build/reports/**/*.html
+      
     publishing:
       email:
         recipients:
