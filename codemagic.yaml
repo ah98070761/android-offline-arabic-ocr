@@ -1,4 +1,5 @@
-# Fix: Final YAML, correcting the 'ClassNotFoundException' by using a more robust curl command (curl -f -L).
+# Fix: Final YAML, removing the manual JAR download and relying on the existing gradlew script
+# to fetch the full Gradle distribution ZIP (7.2), which is more stable.
 workflows:
   android-build:
     name: Android Build and Release
@@ -23,14 +24,12 @@ workflows:
           include: true
     
     scripts:
-      # 1: إعداد SDK - استخدام المسار الأكثر موثوقية $ANDROID_SDK_ROOT
+      # 1: إعداد SDK - تم تصحيح مشكلة المسار
       - name: Set up Android SDK
         script: |
-          # نستخدم $ANDROID_SDK_ROOT
           SDK_MANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           echo "Setting up Android SDK Build Tools $CM_ANDROID_SDK_BUILD_TOOLS, Platform Tools $CM_ANDROID_SDK_PLATFORM_TOOLS, Platform $CM_ANDROID_SDK_PLATFORM"
           
-          # استخدام المسار الصريح لـ sdkmanager
           yes | $SDK_MANAGER "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
           yes | $SDK_MANAGER --licenses
       
@@ -39,10 +38,17 @@ workflows:
         script: |
           mkdir -p gradle/wrapper
           
-      # 3 و 4 (المدمجة): تنزيل JAR ومنح الأذونات. (تم إضافة -f لفرض التنزيل السليم)
-      - name: Download JAR and Grant gradlew permission
+      # 3: منح الأذونات فقط. (تم حذف خطوة التنزيل اليدوية الفاشلة)
+      - name: Grant gradlew permission (Ensure gradlew is executable)
         script: |
-          curl -f -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar && chmod +x gradlew
+          chmod +x gradlew
+      
+      # 4: إعادة تشغيل الـ Wrapper لتنزيل ZIP الخاص بـ Gradle (هذا يحل مشكلة ClassNotFound)
+      - name: Download Gradle Distribution (Using Wrapper)
+        script: |
+          # هذه الخطوة تجعل gradlew ينزل ملف gradle-7.2-bin.zip (أو ما تم تحديده في gradle-wrapper.properties)
+          # هذا هو الإصلاح لـ "ClassNotFoundException"
+          ./gradlew wrapper --gradle-version 7.2
           
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
         script: |
