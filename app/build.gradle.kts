@@ -1,7 +1,6 @@
 // app/build.gradle.kts
 
 plugins {
-    // نطبق الإضافات هنا دون تحديد الإصدار
     id("com.android.application") 
     id("org.jetbrains.kotlin.android")
 }
@@ -61,8 +60,8 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
-    // تم إصلاح طريقة تعريف تبعية Tess-Two لحل خطأ DependencyHandler.module
-    implementation(group = "com.rmtheis", name = "tess-two", version = "9.1.0")
+    // الإصلاح الأخير: استخدام صيغة module() لتجنب خطأ التوافق في Gradle 9.1.0
+    implementation(module("com.rmtheis:tess-two:9.1.0")) // يجب استخدام هذه الصيغة
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
