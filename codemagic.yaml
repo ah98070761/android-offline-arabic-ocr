@@ -1,56 +1,68 @@
 workflows:
   android-build:
-    name: Android Build
-    instance_type: mac_mini_m1
-    max_build_duration: 60
-
+    name: Android Build and Release
     environment:
-      java: 11
-
-    # Corrected: Set the working directory to the subdirectory where gradlew is located.
-    # This typically resolves "gradlew: No such file or directory" when the Android project
-    # is not in the repository root, but in a subfolder like 'android'.
-    working_directory: android 
-
+      vars:
+        CM_JAVA_VERSION: 17
+        CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
+        CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
+        CM_ANDROID_SDK_PLATFORM: 34
+      GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle
+      # groups:
+      #   - google_play_credentials # Add this if you plan to publish to Google Play
+    cache:
+      - $GRADLE_USER_HOME
+      - $CM_BUILD_DIR/.android/build-cache
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: master
+          include: true
+        - pattern: develop
+          include: true
+        - pattern: feature/.*
+          include: true
     scripts:
+      - name: Set up Java
+        script: |
+          echo "Setting up Java $CM_JAVA_VERSION"
+          sdk install java $CM_JAVA_VERSION
+          sdk use java $CM_JAVA_VERSION
+      - name: Set up Android SDK
+        script: |
+          echo "Setting up Android SDK Build Tools $CM_ANDROID_SDK_BUILD_TOOLS, Platform Tools $CM_ANDROID_SDK_PLATFORM_TOOLS, Platform $CM_ANDROID_SDK_PLATFORM"
+          yes | sdkmanager "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
+          yes | sdkmanager --licenses
       - name: Create Gradle Wrapper directory
         script: |
           mkdir -p gradle/wrapper
-
-      - name: Download Gradle Wrapper JAR
+      - name: Download missing Gradle Wrapper JAR
         script: |
           curl -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar
-
-      - name: Grant execute permissions to gradlew
+      - name: Grant execute permission to gradlew
         script: |
-          find . -name gradlew -exec chmod +x {} \;
-
-      - name: Create tessdata directory
-        script: |
-          mkdir -p app/src/main/assets/tessdata
-
-      - name: Download Tesseract Arabic traineddata
-        script: |
-          curl -L -o app/src/main/assets/tessdata/ara.traineddata https://github.com/tesseract-ocr/tessdata_fast/raw/main/ara.traineddata
-
-      - name: Run Android Lint
+          chmod +x gradlew
+      - name: Run Android Lint and Build Android Release Bundle
         script: |
           ./gradlew lintRelease
-
-      - name: Build Android Release APK
-        script: |
-          ./gradlew assembleRelease
-
-      - name: Build Android Release AAB
-        script: |
           ./gradlew bundleRelease
-
     artifacts:
-      - app/build/outputs/apk/**/*.apk
-      - app/build/outputs/bundle/**/*.aab
-      - app/build/reports/**/*.xml
-
+      - build/app/outputs/**/*.aab
+      - build/app/outputs/**/*.apk
+      - build/app/outputs/**/*.json
+      - build/reports/**/*.html
     publishing:
       email:
         recipients:
-          - your.email@example.com
+          - your_email@example.com
+        notify:
+          success: true
+          failure: false
+      # google_play:
+      #   credentials: $GOOGLE_PLAY_CREDENTIALS
+      #   track: internal
+      #   mapping_file: build/outputs/mapping/release/mapping.txt
+      #   from_aab: true
+      #   service_account_key_file: $CM_BUILD_DIR/google_play_credentials.json
