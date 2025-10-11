@@ -1,4 +1,4 @@
-# Fix: Final clean YAML to solve all structural errors including the 'cache: value is not a valid dict' error.
+# Fix: Final clean YAML to solve ALL structural errors, including the tricky 'cache' error.
 workflows:
   android-build:
     name: Android Build and Release
@@ -13,11 +13,10 @@ workflows:
       # groups:
       #   - google_play_credentials 
     
-    # تم تغيير cache إلى بنية القاموس (Dict) المطلوبة من Codemagic
-    cache:
-      paths: # هذا هو المفتاح المفقود الذي يجعلها "Valid Dict"
-        - $GRADLE_USER_HOME
-        - $CM_BUILD_DIR/.android/build-cache
+    # تم تبسيط cache لأقصى درجة، كقائمة مباشرة تحت المفتاح
+    cache: # يجب أن تكون المسافة البادئة هنا دائمًا صحيحة!
+      - $GRADLE_USER_HOME
+      - $CM_BUILD_DIR/.android/build-cache
       
     triggering:
       events:
