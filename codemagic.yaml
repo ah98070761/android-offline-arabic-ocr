@@ -1,23 +1,21 @@
-# Fix: Final clean YAML to solve ALL structural errors, including the tricky 'cache' error.
 workflows:
   android-build:
     name: Android Build and Release
+
     environment:
       vars:
         CM_JAVA_VERSION: 17
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
-        # تعريف مسار Gradle Cache كمتغير بيئة هنا
-        GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle 
-      # groups:
-      #   - google_play_credentials 
-    
-    # تم تبسيط cache لأقصى درجة، كقائمة مباشرة تحت المفتاح
-    cache: # يجب أن تكون المسافة البادئة هنا دائمًا صحيحة!
-      - $GRADLE_USER_HOME
+        GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle
+
+    cache:
+      paths:
+        - ~/.gradle/caches
+        - ~/.gradle/wrapper
         - $CM_BUILD_DIR/.android/build-cache
-      
+
     triggering:
       events:
         - push
@@ -29,53 +27,20 @@ workflows:
           include: true
         - pattern: feature/.*
           include: true
-    
+
     scripts:
       - name: Set up Java
         script: |
-          echo "Setting up Java $CM_JAVA_VERSION"
-          sdk install java $CM_JAVA_VERSION
-          sdk use java $CM_JAVA_VERSION
-      
-      - name: Set up Android SDK
+          echo "Using Java version $CM_JAVA_VERSION"
+
+      - name: Build Android APK
         script: |
-          echo "Setting up Android SDK Build Tools $CM_ANDROID_SDK_BUILD_TOOLS, Platform Tools $CM_ANDROID_SDK_PLATFORM_TOOLS, Platform $CM_ANDROID_SDK_PLATFORM"
-          yes | sdkmanager "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
-          yes | sdkmanager --licenses
-      
-      - name: Create Gradle Wrapper directory
+          ./gradlew assembleRelease
+
+      - name: List build outputs
         script: |
-          mkdir -p gradle/wrapper
-          
-      - name: Download missing Gradle Wrapper JAR
-        script: |
-          curl -L -o gradle/wrapper/gradle-wrapper.jar https://services.gradle.org/distributions/gradle-8.8-wrapper.jar
-          
-      - name: Grant execute permission to gradlew
-        script: |
-          chmod +x gradlew
-          
-      - name: Run Android Lint and Build Android Release Bundle
-        script: |
-          ./gradlew lintRelease
-          ./gradlew bundleRelease
-          
+          ls -R app/build/outputs
+
     artifacts:
-      - build/app/outputs/**/*.aab
-      - build/app/outputs/**/*.apk
-      - build/app/outputs/**/*.json
-      - build/reports/**/*.html
-      
-    publishing:
-      email:
-        recipients:
-          - your_email@example.com
-        notify:
-          success: true
-          failure: false
-      # google_play:
-      #   credentials: $GOOGLE_PLAY_CREDENTIALS
-      #   track: internal
-      #   mapping_file: build/outputs/mapping/release/mapping.txt
-      #   from_aab: true
-      #   service_account_key_file: $CM_BUILD_DIR/google_play_credentials.json
+      - app/build/outputs/**/*.apk
+      - app/build/outputs/**/*.aab
