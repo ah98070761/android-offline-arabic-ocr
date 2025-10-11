@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude the cache directory to prevent backing up temporary files -->
+    <exclude domain="cache" />
+
+    <!-- Exclude the no-backup directory, which is explicitly marked by the app not to be backed up -->
+    <exclude domain="no-backup" />
+
+    <!-- Include all shared preferences -->
+    <include domain="shared-prefs" />
+
+    <!-- Include all databases -->
+    <include domain="database" />
+
+    <!-- Include all files in the app's internal storage -->
+    <include domain="file" />
+
+    <!-- You can also include specific files or directories if needed, for example:
+    <include domain="file" path="my_custom_data/" />
+    <include domain="database" path="my_specific_db.db" />
+    -->
+</full-backup-content>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <rules max_age_days="30">
+        <!-- No specific allow/deny rules are defined here, meaning all data extraction is allowed by default
+             for the purpose of this standard template, with a 30-day cache limit.
+             Add <allow> or <deny> tags here for specific content URIs or components if needed. -->
+    </rules>
+</data-extraction-rules>
