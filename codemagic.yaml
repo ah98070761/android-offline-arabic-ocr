@@ -1,3 +1,4 @@
+# Fix: Final script-based fix. Downloads the reliable Wrapper JAR from Maven Central and renames it to the required name.
 workflows:
   android-build:
     name: Android Build and Release
@@ -7,7 +8,6 @@ workflows:
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
-        # تحديد المسار الصحيح لمخبأ Gradle Cache
         GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle 
       
     triggering:
@@ -23,6 +23,7 @@ workflows:
           include: true
     
     scripts:
+      # 1: إعداد SDK
       - name: Set up Android SDK
         script: |
           SDK_MANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
@@ -31,14 +32,22 @@ workflows:
           yes | $SDK_MANAGER "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
           yes | $SDK_MANAGER --licenses
       
+      # 2: الإصلاح الجذري: تنزيل ملف JAR الصحيح من Maven Central وتغيير اسمه
+      - name: Download and Rename Correct Gradle Wrapper JAR (from Maven Central)
+        script: |
+          mkdir -p gradle/wrapper
+          # هذا الرابط يحتوي على الكلاس المفقود وهو مستقر جداً. ننزله ونسميه gradle-wrapper.jar
+          curl -f -L -o gradle/wrapper/gradle-wrapper.jar https://repo1.maven.org/maven2/org/gradle/gradle-wrapper/6.7.1/gradle-wrapper-6.7.1.jar
+      
+      # 3: منح الأذونات
       - name: Grant gradlew permission
         script: |
-          # هذه الخطوة ستنجح الآن لأنك قمت بإضافة الملف gradle-wrapper.jar
           chmod +x gradlew
           
-      - name: Download and Set up Gradle Distribution
+      # 4: تنزيل وتجهيز توزيع Gradle
+      - name: Download and Set up Gradle Distribution (Triggered by Wrapper)
         script: |
-          # هذا الأمر سيقوم بتشغيل الـ Wrapper، الذي سيقوم بتنزيل ملف ZIP الكامل (9.1.0) تلقائياً، وتثبيته، والبدء في بناء التبعيات.
+          # سيعمل هذا الأمر الآن. سيجد الـ JAR التمهيدي (6.7.1) ويقوم بتنزيل الـ ZIP (9.1.0) كما هو محدد في gradle-wrapper.properties
           ./gradlew dependencies --no-daemon
           
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
