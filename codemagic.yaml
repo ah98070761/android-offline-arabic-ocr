@@ -1,4 +1,3 @@
-# Fix: Final YAML - Removing all failed JAR downloads. Directly downloading and extracting the full Gradle 9.1.0-bin.zip.
 workflows:
   android-build:
     name: Android Build and Release
@@ -8,6 +7,7 @@ workflows:
         CM_ANDROID_SDK_BUILD_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM_TOOLS: 34.0.0
         CM_ANDROID_SDK_PLATFORM: 34
+        # تحديد المسار الصحيح لمخزن Gradle Cache
         GRADLE_USER_HOME: $CM_BUILD_DIR/.gradle 
       
     triggering:
@@ -23,7 +23,7 @@ workflows:
           include: true
     
     scripts:
-      # 1: إعداد SDK - تم تصحيح مشكلة المسار
+      # 1: إعداد SDK
       - name: Set up Android SDK
         script: |
           SDK_MANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
@@ -32,29 +32,19 @@ workflows:
           yes | $SDK_MANAGER "build-tools;$CM_ANDROID_SDK_BUILD_TOOLS" "platform-tools" "platforms;android-$CM_ANDROID_SDK_PLATFORM"
           yes | $SDK_MANAGER --licenses
       
-      # 2: إنشاء المجلد
-      - name: Create Gradle Wrapper directory
-        script: |
-          mkdir -p gradle/wrapper
-          
-      # 3: الإصلاح الجذري: تنزيل ZIP الثنائي لـ Gradle 9.1.0
-      - name: Download and Extract Gradle 9.1.0 Distribution ZIP
-        script: |
-          # تنزيل ملف الـ ZIP الثنائي الكامل مباشرة
-          curl -f -L -o gradle.zip https://services.gradle.org/distributions/gradle-9.1.0-bin.zip
-          
-          # فك ضغط الملف داخل مجلد gradle/wrapper
-          unzip gradle.zip -d gradle/wrapper
-          
-          # نقل محتويات مجلد gradle-9.1.0 إلى gradle/wrapper
-          mv gradle/wrapper/gradle-9.1.0/lib/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
-          
-      # 4: منح الأذونات
-      - name: Grant gradlew permission
+      # 2: منح الأذونات (ضروري دائمًا)
+      - name: Grant gradlew permission (MANDATORY)
         script: |
           chmod +x gradlew
           
-      # 5: تشغيل البناء (لن تحتاج هذه الخطوة إلى التنزيل مرة أخرى)
+      # 3: تشغيل أول أمر Gradle (سيقوم هذا الأمر الآن بتنزيل ملف ZIP الكامل 9.1.0 تلقائياً)
+      # إذا كان ملف gradlew نفسه مفقودًا، يجب على المستخدم التأكد من وجوده في المشروع.
+      - name: Download and Set up Gradle Distribution (Triggered by Wrapper)
+        script: |
+          # نستخدم أمر بسيط لـ Gradle. إذا كان ملف gradle-wrapper.properties مُعدًا لاستخدام 9.1.0، فسيتم تنزيله هنا.
+          # هذا هو المكان الذي سيتم فيه تنزيل ملف ZIP (gradle-9.1.0-bin.zip)
+          ./gradlew dependencies --no-daemon
+          
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
         script: |
           ./gradlew lintRelease
