@@ -1,5 +1,8 @@
+// app/build.gradle.kts
+
 plugins {
-    id("com.android.application")
+    // نطبق الإضافات هنا دون تحديد الإصدار
+    id("com.android.application") 
     id("org.jetbrains.kotlin.android")
 }
 
@@ -38,7 +41,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
-        compose = false // Assuming no Jetpack Compose for now
+        compose = false 
     }
     packaging {
         resources {
@@ -57,9 +60,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
     // Tesseract OCR library (tess-two wrapper)
-    // Note: Make sure to check for the latest stable version or alternatives if needed.
-    // This library might require specific NDK setup if compiling from source,
-    // but using the pre-built AAR usually simplifies things.
     implementation("com.rmtheis:tess-two:9.1.0")
 
     // Kotlin Coroutines for asynchronous operations
