@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.ocr.databinding.ActivityMainBinding // هذا هو View Binding
+import com.example.ocr.databinding.ActivityMainBinding 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,16 +27,17 @@ class MainActivity : AppCompatActivity() {
         uri?.let {
             imageUri = it
             binding.imageView.setImageURI(it)
-            binding.textViewResult.setText(R.string.image_to_ocr) // استخدام نص المورد المُضاف
+            // استخدام binding.textViewResult للوصول إلى عنصر النص
+            binding.textViewResult.setText(R.string.image_to_ocr) 
             binding.textViewResult.visibility = View.VISIBLE
         }
     }
     
-    // 3. مُسجل النشاط لالتقاط صورة (ملاحظة: يحتاج إلى إعدادات إضافية لاستخراج Uri حقيقي)
+    // 3. مُسجل النشاط لالتقاط صورة
     private val captureImageLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
         bitmap?.let {
             binding.imageView.setImageBitmap(it)
-            imageUri = null // تعطيل OCR لهذه الصورة حتى يتم استخدام Uri حقيقي
+            imageUri = null 
             Toast.makeText(this, "تم التقاط الصورة، يرجى اختيار صورة من المعرض لـ OCR الفعلي.", Toast.LENGTH_LONG).show()
         }
     }
@@ -52,9 +53,9 @@ class MainActivity : AppCompatActivity() {
         // تهيئة OcrManager
         OcrManager.init(applicationContext)
 
-        // 4. ربط وظائف الأزرار (باستخدام binding بدلاً من المراجع المفقودة)
+        // 4. ربط وظائف الأزرار باستخدام binding.buttonName
         binding.buttonPickImage.setOnClickListener {
-            pickImageLauncher.launch("image/*") // فتح معرض الصور
+            pickImageLauncher.launch("image/*") 
         }
 
         binding.buttonCaptureImage.setOnClickListener {
@@ -78,7 +79,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         // تعطيل الأزرار وعرض رسالة التحميل
+        // استخدام binding.buttonPerformOcr
         binding.buttonPerformOcr.isEnabled = false
+        // استخدام binding.textViewResult
         binding.textViewResult.setText("جاري معالجة النص... يرجى الانتظار.")
         binding.textViewResult.visibility = View.VISIBLE
 
