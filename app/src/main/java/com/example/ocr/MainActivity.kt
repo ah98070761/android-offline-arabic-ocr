@@ -1,78 +1,103 @@
 package com.example.ocr
 
-import android.Manifest
-import android.content.pm.PackageManager
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import android.provider.MediaStore
+import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import java.io.File
+import androidx.lifecycle.lifecycleScope
+import com.example.ocr.databinding.ActivityMainBinding // هذا هو View Binding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var ocrManager: OcrManager
-    private lateinit var textView: TextView
-    private lateinit var imageView: ImageView
+    // 1. تعريف View Binding
+    private lateinit var binding: ActivityMainBinding
+    private val ocrManager = OcrManager()
+    private var imageUri: Uri? = null
 
-    private val requestPermissionLauncher = 
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission granted, do nothing here as we request file pick later
-            } else {
-                textView.text = "Storage permission denied. Cannot load Tesseract language files."
-            }
-        }
-
-    private val pickFileLauncher = 
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    // For simplicity, handle image pick for now
-                    // For complex file types like PDF, FileUtility will be needed
-                    val bitmap = FileUtility.uriToBitmap(this, uri)
-                    imageView.setImageBitmap(bitmap)
-                    if (bitmap != null) {
-                        textView.text = "Processing..."
-                        // Run OCR on a separate thread
-                        Thread {
-                            val resultText = ocrManager.performOcr(bitmap)
-                            runOnUiThread {
-                                textView.text = resultText
-                            }
-                        }.start()
-                    }
-                }
-            }
-        }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        textView = findViewById(R.id.textViewResult)
-        imageView = findViewById(R.id.imageView)
-        val pickButton: Button = findViewById(R.id.buttonPickImage)
-
-        // Request storage permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-
-        // Initialize OCR Manager
-        ocrManager = OcrManager(this)
-
-        // Set up the button click listener
-        pickButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            pickFileLauncher.launch(intent)
+    // 2. مُسجل النشاط لاختيار صورة
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            imageUri = it
+            binding.imageView.setImageURI(it)
+            binding.textViewResult.setText(R.string.image_to_ocr) // استخدام نص المورد المُضاف
+            binding.textViewResult.visibility = View.VISIBLE
         }
     }
     
-    override fun onDestroy() {
-        super.onDestroy()
-        ocrManager.stopTesseract()
+    // 3. مُسجل النشاط لالتقاط صورة (ملاحظة: يحتاج إلى إعدادات إضافية لاستخراج Uri حقيقي)
+    private val captureImageLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
+        bitmap?.let {
+            binding.imageView.setImageBitmap(it)
+            imageUri = null // تعطيل OCR لهذه الصورة حتى يتم استخدام Uri حقيقي
+            Toast.makeText(this, "تم التقاط الصورة، يرجى اختيار صورة من المعرض لـ OCR الفعلي.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // تهيئة View Binding
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // تهيئة OcrManager
+        OcrManager.init(applicationContext)
+
+        // 4. ربط وظائف الأزرار (باستخدام binding بدلاً من المراجع المفقودة)
+        binding.buttonPickImage.setOnClickListener {
+            pickImageLauncher.launch("image/*") // فتح معرض الصور
+        }
+
+        binding.buttonCaptureImage.setOnClickListener {
+            captureImageLauncher.launch(null) 
+        }
+
+        binding.buttonPerformOcr.setOnClickListener {
+            performOcrProcess()
+        }
+
+        // إخفاء نتيجة OCR في البداية
+        binding.textViewResult.visibility = View.GONE
+    }
+
+    // 5. وظيفة إجراء OCR
+    private fun performOcrProcess() {
+        val currentUri = imageUri
+        if (currentUri == null) {
+            Toast.makeText(this, "يرجى اختيار صورة أولاً لإجراء OCR.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // تعطيل الأزرار وعرض رسالة التحميل
+        binding.buttonPerformOcr.isEnabled = false
+        binding.textViewResult.setText("جاري معالجة النص... يرجى الانتظار.")
+        binding.textViewResult.visibility = View.VISIBLE
+
+        // تشغيل عملية OCR في Coroutine (Dispatcher.IO)
+        lifecycleScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    ocrManager.performOcr(currentUri)
+                }
+                
+                // تحديث الواجهة بنتيجة OCR
+                binding.textViewResult.setText(result)
+
+            } catch (e: Exception) {
+                binding.textViewResult.setText("فشل في معالجة OCR: ${e.message}")
+            } finally {
+                // تفعيل الأزرار مرة أخرى
+                binding.buttonPerformOcr.isEnabled = true
+            }
+        }
     }
 }
