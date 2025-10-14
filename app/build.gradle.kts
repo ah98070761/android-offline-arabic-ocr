@@ -1,5 +1,3 @@
-// app/build.gradle.kts
-
 plugins {
     id("com.android.application") 
     id("org.jetbrains.kotlin.android")
@@ -40,12 +38,9 @@ android {
         // تم التحديث إلى Java 17
         jvmTarget = "17"
     }
-// ... (المحتوى السابق) ...
     buildFeatures {
-        viewBinding = true [cite: 4]
+        viewBinding = true
         compose = false 
-    }
-// ... (المحتوى السابق) ...
     }
     packaging {
         resources {
