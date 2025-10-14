@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Offline Arabic Ocr App</string>
+    <string name="image_to_ocr">صورة جاهزة للقراءة</string>
+    <string name="select_image">اختر صورة</string>
+    <string name="capture_image">التقط صورة</string>
+    <string name="perform_ocr">إجراء القراءة الضوئية (OCR)</string>
+    <string name="ocr_result">نتيجة القراءة الضوئية (OCR)</string>
 </resources>
