@@ -15,20 +15,22 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
+    // يجب أن تكون التهيئة باستخدام View Binding
     private lateinit var binding: ActivityMainBinding
     private val ocrManager = OcrManager()
     private var imageUri: Uri? = null
 
+    // تم تصحيح جميع المراجع هنا لـ binding.textViewResult
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imageUri = it
             binding.imageView.setImageURI(it)
-            // تم التصحيح لـ binding.textViewResult
             binding.textViewResult.setText(R.string.image_to_ocr)
             binding.textViewResult.visibility = View.VISIBLE
         }
     }
     
+    // تم تصحيح جميع المراجع هنا
     private val captureImageLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
         bitmap?.let {
             binding.imageView.setImageBitmap(it)
@@ -41,14 +43,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // تهيئة View Binding
+        // تهيئة View Binding يجب أن تتم أولاً
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
         // تهيئة OcrManager
         OcrManager.init(applicationContext)
 
-        // ربط وظائف الأزرار باستخدام binding
+        // تم تصحيح جميع مراجع الأزرار هنا لـ binding.buttonName
         binding.buttonPickImage.setOnClickListener {
             pickImageLauncher.launch("image/*") 
         }
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             performOcrProcess()
         }
 
-        // إخفاء نتيجة OCR في البداية
+        // تم تصحيح المرجع هنا
         binding.textViewResult.visibility = View.GONE
     }
 
@@ -72,26 +74,24 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // تعطيل الأزرار وعرض رسالة التحميل باستخدام binding
+        // تم تصحيح جميع المراجع هنا
         binding.buttonPerformOcr.isEnabled = false
-        // استخدام خاصية .text مباشرة بدلاً من .setText(R.string...)
         binding.textViewResult.text = "جاري معالجة النص... يرجى الانتظار."
         binding.textViewResult.visibility = View.VISIBLE
 
-        // تشغيل عملية OCR في Coroutine
         lifecycleScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
                     ocrManager.performOcr(currentUri)
                 }
                 
-                // تحديث الواجهة بنتيجة OCR
+                // تم تصحيح المرجع هنا
                 binding.textViewResult.text = result
 
             } catch (e: Exception) {
                 binding.textViewResult.text = "فشل في معالجة OCR: ${e.message}"
             } finally {
-                // تفعيل الأزرار مرة أخرى باستخدام binding
+                // تم تصحيح المرجع هنا
                 binding.buttonPerformOcr.isEnabled = true
             }
         }
