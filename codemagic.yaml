@@ -22,7 +22,6 @@ workflows:
           include: true
     
     scripts:
-      # ✅ الخطوة الفعالة لضمان بناء نظيف: مسح ذاكرة التخزين المؤقت لـ Gradle يدويًا
       - name: Clear old Gradle cache for clean build
         script: |
           rm -rf $HOME/.gradle/caches/
@@ -38,12 +37,10 @@ workflows:
       
       - name: Grant gradlew permission
         script: |
-          # سيعمل الآن لأن الملف gradle-wrapper.jar موجود
           chmod +x gradlew
           
       - name: Download and Set up Gradle Distribution
         script: |
-          # الـ Wrapper سيجد الـ JAR التمهيدي ويقوم بتنزيل الـ ZIP 9.1.0 تلقائيًا
           ./gradlew dependencies --no-daemon
           
       - name: Run Android Lint and Build Android Release Bundle (Final Build Step)
