@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+// تأكد أن هذا السطر موجود ويعمل!
 import com.example.ocr.databinding.ActivityMainBinding 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         uri?.let {
             imageUri = it
             binding.imageView.setImageURI(it)
-            // تم التصحيح: binding.textViewResult
+            // الوصول الصحيح: binding.textViewResult
             binding.textViewResult.setText(R.string.image_to_ocr) 
             binding.textViewResult.visibility = View.VISIBLE
         }
@@ -79,9 +80,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         // تعطيل الأزرار وعرض رسالة التحميل
-        // تم التصحيح: binding.buttonPerformOcr
+        // الوصول الصحيح: binding.buttonPerformOcr
         binding.buttonPerformOcr.isEnabled = false
-        // تم التصحيح: binding.textViewResult
+        // الوصول الصحيح: binding.textViewResult
         binding.textViewResult.setText("جاري معالجة النص... يرجى الانتظار.")
         binding.textViewResult.visibility = View.VISIBLE
 
