@@ -40,9 +40,12 @@ android {
         // تم التحديث إلى Java 17
         jvmTarget = "17"
     }
+// ... (المحتوى السابق) ...
     buildFeatures {
-        viewBinding = true
+        viewBinding = true [cite: 4]
         compose = false 
+    }
+// ... (المحتوى السابق) ...
     }
     packaging {
         resources {
