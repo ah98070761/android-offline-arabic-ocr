@@ -23,8 +23,8 @@ class MainActivity : AppCompatActivity() {
         uri?.let {
             imageUri = it
             binding.imageView.setImageURI(it)
-            binding.textViewResult.setText(R.string.image_to_ocr) // استخدام binding.
-            binding.textViewResult.visibility = View.VISIBLE // استخدام binding.
+            binding.textViewResult.setText(R.string.image_to_ocr)
+            binding.textViewResult.visibility = View.VISIBLE
         }
     }
     
@@ -40,26 +40,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // الخطوة الأهم: تهيئة View Binding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
         OcrManager.init(applicationContext)
 
-        // جميع مراجع الأزرار تستخدم binding.
-        binding.buttonPickImage.setOnClickListener { // استخدام binding.
+        binding.buttonPickImage.setOnClickListener {
             pickImageLauncher.launch("image/*") 
         }
 
-        binding.buttonCaptureImage.setOnClickListener { // استخدام binding.
+        binding.buttonCaptureImage.setOnClickListener {
             captureImageLauncher.launch(null) 
         }
 
-        binding.buttonPerformOcr.setOnClickListener { // استخدام binding.
+        binding.buttonPerformOcr.setOnClickListener {
             performOcrProcess()
         }
 
-        binding.textViewResult.visibility = View.GONE // استخدام binding.
+        binding.textViewResult.visibility = View.GONE
     }
 
     private fun performOcrProcess() {
@@ -69,10 +67,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // جميع المراجع تستخدم binding.
-        binding.buttonPerformOcr.isEnabled = false // استخدام binding.
-        binding.textViewResult.text = "جاري معالجة النص... يرجى الانتظار." // استخدام binding.
-        binding.textViewResult.visibility = View.VISIBLE // استخدام binding.
+        binding.buttonPerformOcr.isEnabled = false
+        binding.textViewResult.text = "جاري معالجة النص... يرجى الانتظار."
+        binding.textViewResult.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             try {
@@ -80,12 +77,12 @@ class MainActivity : AppCompatActivity() {
                     ocrManager.performOcr(currentUri)
                 }
                 
-                binding.textViewResult.text = result // استخدام binding.
+                binding.textViewResult.text = result
 
             } catch (e: Exception) {
                 binding.textViewResult.text = "فشل في معالجة OCR: ${e.message}"
             } finally {
-                binding.buttonPerformOcr.isEnabled = true // استخدام binding.
+                binding.buttonPerformOcr.isEnabled = true
             }
         }
     }
