@@ -1,7 +1,6 @@
 workflows:
   android-build:
     name: Android Build and Release
-    git-cache: false # 💡 إضافة هذا السطر لإجبار Codemagic على استنساخ نظيف للمستودع
     environment:
       vars:
         CM_JAVA_VERSION: 17
@@ -23,7 +22,7 @@ workflows:
           include: true
     
     scripts:
-      # 💡 إضافة هذه الخطوة لضمان مسح أي ملفات Gradle مؤقتة قديمة
+      # ✅ الخطوة الفعالة لضمان بناء نظيف: مسح ذاكرة التخزين المؤقت لـ Gradle يدويًا
       - name: Clear old Gradle cache for clean build
         script: |
           rm -rf $HOME/.gradle/caches/
