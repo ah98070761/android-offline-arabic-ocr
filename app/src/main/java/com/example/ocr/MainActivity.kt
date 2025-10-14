@@ -15,12 +15,10 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
-    // يجب أن تكون التهيئة باستخدام View Binding
     private lateinit var binding: ActivityMainBinding
     private val ocrManager = OcrManager()
     private var imageUri: Uri? = null
 
-    // تم تصحيح جميع المراجع هنا لـ binding.textViewResult
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imageUri = it
@@ -30,7 +28,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    // تم تصحيح جميع المراجع هنا
     private val captureImageLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
         bitmap?.let {
             binding.imageView.setImageBitmap(it)
@@ -43,14 +40,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // تهيئة View Binding يجب أن تتم أولاً
+        // تهيئة View Binding أولاً
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // تهيئة OcrManager
         OcrManager.init(applicationContext)
 
-        // تم تصحيح جميع مراجع الأزرار هنا لـ binding.buttonName
+        // جميع المراجع تستخدم binding.
         binding.buttonPickImage.setOnClickListener {
             pickImageLauncher.launch("image/*") 
         }
@@ -63,7 +59,6 @@ class MainActivity : AppCompatActivity() {
             performOcrProcess()
         }
 
-        // تم تصحيح المرجع هنا
         binding.textViewResult.visibility = View.GONE
     }
 
@@ -74,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // تم تصحيح جميع المراجع هنا
+        // جميع المراجع تستخدم binding.
         binding.buttonPerformOcr.isEnabled = false
         binding.textViewResult.text = "جاري معالجة النص... يرجى الانتظار."
         binding.textViewResult.visibility = View.VISIBLE
@@ -85,13 +80,11 @@ class MainActivity : AppCompatActivity() {
                     ocrManager.performOcr(currentUri)
                 }
                 
-                // تم تصحيح المرجع هنا
                 binding.textViewResult.text = result
 
             } catch (e: Exception) {
                 binding.textViewResult.text = "فشل في معالجة OCR: ${e.message}"
             } finally {
-                // تم تصحيح المرجع هنا
                 binding.buttonPerformOcr.isEnabled = true
             }
         }
