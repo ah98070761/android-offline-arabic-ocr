@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         uri?.let {
             imageUri = it
             binding.imageView.setImageURI(it)
-            // استخدام binding.textViewResult للوصول إلى عنصر النص
+            // تم التصحيح: binding.textViewResult
             binding.textViewResult.setText(R.string.image_to_ocr) 
             binding.textViewResult.visibility = View.VISIBLE
         }
@@ -79,9 +79,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         // تعطيل الأزرار وعرض رسالة التحميل
-        // استخدام binding.buttonPerformOcr
+        // تم التصحيح: binding.buttonPerformOcr
         binding.buttonPerformOcr.isEnabled = false
-        // استخدام binding.textViewResult
+        // تم التصحيح: binding.textViewResult
         binding.textViewResult.setText("جاري معالجة النص... يرجى الانتظار.")
         binding.textViewResult.visibility = View.VISIBLE
 
