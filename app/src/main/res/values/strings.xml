@@ -1,6 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Android Offline Arabic OCR</string>
+    <string name="app_name">قراءة ضوئية عربية غير متصلة</string>
+
+    <string name="image_to_ocr">صورة للقراءة الضوئية</string>
+    <string name="select_image">اختيار صورة</string>
+    <string name="capture_image">التقاط صورة</string>
+    <string name="perform_ocr">تشغيل OCR</string>
+    <string name="ocr_result">نتيجة القراءة الضوئية</string>
+
     <string name="perform_ocr_image">تشغيل OCR على الصورة</string>
     <string name="perform_ocr_pdf">تشغيل OCR على PDF</string>
     <string name="pdf_ready_to_ocr">تم اختيار ملف PDF. اضغط على الزر لتشغيل OCR.</string>
