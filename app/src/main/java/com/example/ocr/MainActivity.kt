@@ -23,16 +23,16 @@ class MainActivity : AppCompatActivity() {
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imageUri = it
-            // ✅ استخدام binding. لجميع المراجع
+            // ✅ تم تغيير textViewResult إلى tvOcrResult
             binding.imageView.setImageURI(it) 
-            binding.textViewResult.setText(R.string.image_to_ocr) 
-            binding.textViewResult.visibility = View.VISIBLE
+            binding.tvOcrResult.setText(R.string.image_to_ocr) 
+            binding.tvOcrResult.visibility = View.VISIBLE
         }
     }
-    
+
     private val captureImageLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
         bitmap?.let {
-            binding.imageView.setImageBitmap(it) // ✅ استخدام binding.
+            binding.imageView.setImageBitmap(it) 
             imageUri = null 
             Toast.makeText(this, "تم التقاط الصورة، يرجى اختيار صورة من المعرض لـ OCR الفعلي.", Toast.LENGTH_LONG).show()
         }
@@ -41,27 +41,28 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // تهيئة View Binding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
         OcrManager.init(applicationContext)
 
-        // ✅ استخدام binding. لجميع الأزرار
-        binding.buttonPickImage.setOnClickListener {
+        // ✅ تم تغيير buttonPickImage إلى btnSelectImage
+        binding.btnSelectImage.setOnClickListener {
             pickImageLauncher.launch("image/*") 
         }
 
-        binding.buttonCaptureImage.setOnClickListener {
+        binding.btnCaptureImage.setOnClickListener {
             captureImageLauncher.launch(null) 
         }
 
-        binding.buttonPerformOcr.setOnClickListener {
+        binding.btnPerformOcr.setOnClickListener {
             performOcrProcess()
         }
 
-        binding.textViewResult.visibility = View.GONE
+        // ✅ تم تغيير textViewResult إلى tvOcrResult
+        binding.tvOcrResult.visibility = View.GONE
     }
 
     private fun performOcrProcess() {
@@ -71,23 +72,25 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // ✅ استخدام binding. لجميع العناصر داخل الدالة
-        binding.buttonPerformOcr.isEnabled = false
-        binding.textViewResult.text = "جاري معالجة النص... يرجى الانتظار."
-        binding.textViewResult.visibility = View.VISIBLE
+        // ✅ تم تغيير buttonPerformOcr إلى btnPerformOcr
+        binding.btnPerformOcr.isEnabled = false
+        // ✅ تم تغيير textViewResult إلى tvOcrResult
+        binding.tvOcrResult.text = "جاري معالجة النص... يرجى الانتظار."
+        binding.tvOcrResult.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
                     ocrManager.performOcr(currentUri)
                 }
-                
-                binding.textViewResult.text = result
+
+                // ✅ تم تغيير textViewResult إلى tvOcrResult
+                binding.tvOcrResult.text = result
 
             } catch (e: Exception) {
-                binding.textViewResult.text = "فشل في معالجة OCR: ${e.message}"
+                binding.tvOcrResult.text = "فشل في معالجة OCR: ${e.message}"
             } finally {
-                binding.buttonPerformOcr.isEnabled = true
+                binding.btnPerformOcr.isEnabled = true
             }
         }
     }
