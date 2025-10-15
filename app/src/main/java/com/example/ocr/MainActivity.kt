@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
+    // تعريف كائن View Binding
     private lateinit var binding: ActivityMainBinding
     private val ocrManager = OcrManager()
     private var imageUri: Uri? = null
@@ -22,15 +23,16 @@ class MainActivity : AppCompatActivity() {
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imageUri = it
-            binding.imageView.setImageURI(it) // تم التصحيح: استخدام binding.
-            binding.textViewResult.setText(R.string.image_to_ocr) // تم التصحيح: استخدام binding.
-            binding.textViewResult.visibility = View.VISIBLE // تم التصحيح: استخدام binding.
+            // ✅ استخدام binding. لجميع المراجع
+            binding.imageView.setImageURI(it) 
+            binding.textViewResult.setText(R.string.image_to_ocr) 
+            binding.textViewResult.visibility = View.VISIBLE
         }
     }
     
     private val captureImageLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
         bitmap?.let {
-            binding.imageView.setImageBitmap(it) // تم التصحيح: استخدام binding.
+            binding.imageView.setImageBitmap(it) // ✅ استخدام binding.
             imageUri = null 
             Toast.makeText(this, "تم التقاط الصورة، يرجى اختيار صورة من المعرض لـ OCR الفعلي.", Toast.LENGTH_LONG).show()
         }
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         
         OcrManager.init(applicationContext)
 
-        // استخدام binding. لجميع العناصر
+        // ✅ استخدام binding. لجميع الأزرار
         binding.buttonPickImage.setOnClickListener {
             pickImageLauncher.launch("image/*") 
         }
@@ -69,7 +71,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // استخدام binding. لجميع العناصر
+        // ✅ استخدام binding. لجميع العناصر داخل الدالة
         binding.buttonPerformOcr.isEnabled = false
         binding.textViewResult.text = "جاري معالجة النص... يرجى الانتظار."
         binding.textViewResult.visibility = View.VISIBLE
