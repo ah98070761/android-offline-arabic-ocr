@@ -35,22 +35,34 @@ jobs:
       - name: Grant Execute Permission for Gradle Wrapper
         # إعطاء صلاحية التشغيل لملف gradlew
         run: chmod +x gradlew
-        
-      # 💡 خطوة إضافية لضمان تنظيف الكود والبناء (تجنب مشاكل الـ cache/references)
+
       - name: Clean Build Environment
+        # خطوة إضافية لضمان تنظيف الكود والبناء
         run: ./gradlew clean --no-daemon
 
       - name: Run Android Lint (Static Code Analysis)
         # تشغيل فحص Lint لضمان جودة الكود قبل البناء
         run: ./gradlew lintRelease --no-daemon
 
+      # 💡 خطوة جديدة: بناء حزمة Debug APK (موقعة ومناسبة للاختبار)
+      - name: Build Debug APK (Signed and Installable for Testing)
+        run: ./gradlew assembleDebug --no-daemon
+
       - name: Build Release Bundle (AAB)
-        # بناء حزمة AAB
+        # بناء حزمة AAB (غير موقعة للاختبار)
         run: ./gradlew bundleRelease --no-daemon
         
       - name: Build Release APK
-        # بناء حزمة APK
+        # بناء حزمة APK (غير موقعة للاختبار)
         run: ./gradlew assembleRelease --no-daemon
+
+      # 💡 خطوة جديدة: رفع حزمة Debug APK
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk-for-testing
+          # المسار الافتراضي لحزمة Debug APK الموقعة
+          path: app/build/outputs/apk/debug/*.apk
 
       - name: Upload Release Artifacts (AAB)
         # رفع ملف حزمة التطبيق (AAB) كناتج للسير عمل
