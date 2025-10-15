@@ -2,16 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions for image selection and camera access -->
-    <!-- For Android 12 (API 31) and below, and for devices running API 32,
-         READ_EXTERNAL_STORAGE is used to access shared storage like gallery. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <!-- For Android 13 (API 33) and above, READ_MEDIA_IMAGES is the preferred way
-         to access images from the gallery. -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
-    <!-- Permission for taking photos with the device camera -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature 
+        android:name="android.hardware.camera" 
+        android:required="false" />
 
     <application
         android:allowBackup="true"
