@@ -39,7 +39,6 @@ class OcrManager {
         datapath = appContext.filesDir.absolutePath + "/tesseract/"
         copyTessData()
         
-        // يجب أن تكون تهيئة API في نفس الـ Thread، ونتأكد أن المسار موجود.
         val dataDir = File(datapath)
         if (!dataDir.exists() && !dataDir.mkdirs()) {
             Log.e(TAG, "Could not create directory $datapath")
@@ -93,11 +92,9 @@ class OcrManager {
     //  وظيفة OCR للصور
     // **********************************************
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
-        // ✅ تم الإصلاح: TessBaseAPI لا يحتاج إلى ::
-        if (!tessBaseAPI.isInitialized) {
-            return@withContext "خطأ: لم يتم تهيئة محرك OCR بنجاح."
-        }
-
+        // ❌ تمت إزالة التحقق من tessBaseAPI.isInitialized لأنه غير مدعوم في tess-two
+        // نعتمد على كتلة try-catch إذا فشلت التهيئة
+        
         try {
             val bitmap = MediaStore.Images.Media.getBitmap(appContext.contentResolver, imageUri)
             
@@ -118,7 +115,8 @@ class OcrManager {
 
         } catch (e: Exception) {
             Log.e(TAG, "OCR error: ${e.message}")
-            "فشل في معالجة OCR: ${e.message}"
+            // إذا فشل البناء، فمن المحتمل أن تكون التهيئة قد فشلت
+            "فشل في معالجة OCR. تحقق من تهيئة Tesseract ووجود ملفات اللغة: ${e.message}"
         }
     }
 
@@ -129,11 +127,8 @@ class OcrManager {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return@withContext "خطأ: ميزة قراءة PDF تتطلب Android 5.0 (API 21) أو أعلى."
         }
-        // ✅ تم الإصلاح: TessBaseAPI لا يحتاج إلى ::
-        if (!tessBaseAPI.isInitialized) {
-            return@withContext "خطأ: لم يتم تهيئة محرك OCR بنجاح."
-        }
-
+        // ❌ تمت إزالة التحقق من tessBaseAPI.isInitialized لأنه غير مدعوم في tess-two
+        
         val fullOcrResult = StringBuilder()
         var pfd: ParcelFileDescriptor? = null
         var renderer: PdfRenderer? = null
