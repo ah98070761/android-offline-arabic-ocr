@@ -93,6 +93,7 @@ class OcrManager {
     //  وظيفة OCR للصور
     // **********************************************
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
+        // ✅ تم الإصلاح: TessBaseAPI لا يحتاج إلى ::
         if (!tessBaseAPI.isInitialized) {
             return@withContext "خطأ: لم يتم تهيئة محرك OCR بنجاح."
         }
@@ -100,7 +101,7 @@ class OcrManager {
         try {
             val bitmap = MediaStore.Images.Media.getBitmap(appContext.contentResolver, imageUri)
             
-            // التأكد من أن الصورة هي RGB_565 أو ARGB_8888 (تنسيقات مدعومة)
+            // التأكد من أن الصورة هي ARGB_8888 (تنسيقات مدعومة)
             val processedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false) 
 
             tessBaseAPI.setImage(processedBitmap)
@@ -128,6 +129,7 @@ class OcrManager {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return@withContext "خطأ: ميزة قراءة PDF تتطلب Android 5.0 (API 21) أو أعلى."
         }
+        // ✅ تم الإصلاح: TessBaseAPI لا يحتاج إلى ::
         if (!tessBaseAPI.isInitialized) {
             return@withContext "خطأ: لم يتم تهيئة محرك OCR بنجاح."
         }
