@@ -34,7 +34,8 @@ class MainActivity : AppCompatActivity() {
     private val pickPdfLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imageUri = it // نستخدم imageUri مؤقتاً لتخزين URI ملف PDF
-            binding.imageView.setImageResource(R.drawable.ic_pdf) // عرض أيقونة PDF بدلاً من الصورة
+            // ✅ تم الإصلاح: تم تغيير ic_pdf إلى ic_launcher_foreground كبديل موجود
+            binding.imageView.setImageResource(R.drawable.ic_launcher_foreground) 
             binding.tvOcrResult.text = getString(R.string.pdf_ready_to_ocr)
             binding.tvOcrResult.visibility = View.VISIBLE
             binding.btnPerformOcr.text = getString(R.string.perform_ocr_pdf) // تحديث النص
@@ -59,22 +60,17 @@ class MainActivity : AppCompatActivity() {
 
         // تعديل مستمع النقر لزر اختيار الصور
         binding.btnSelectImage.setOnClickListener {
-            pickImageLauncher.launch("image/*") 
+            // سنستخدم زر اختيار الصور لاختيار إما صور أو PDF
+            pickImageLauncher.launch("image/*|application/pdf")
         }
 
         binding.btnCaptureImage.setOnClickListener {
             captureImageLauncher.launch(null) 
         }
         
-        // 3. إضافة مستمع لزر اختيار ملف PDF (سنفترض وجود زر جديد في XML)
-        // **ملاحظة:** إذا لم يكن لديك زر لاختيار PDF، استخدم نفس زر اختيار الصور مؤقتاً
         binding.btnPerformOcr.setOnClickListener {
             performOcrProcess()
         }
-        
-        // 4. إضافة دالة للتعامل مع اختيار PDF (إذا لم يكن لديك زر مخصص، تجاهل هذا السطر)
-        // إذا كان لديك زر لـ PDF، يجب إضافته في activity_main.xml
-        // binding.btnSelectPdf.setOnClickListener { pickPdfLauncher.launch("application/pdf") }
 
         binding.tvOcrResult.visibility = View.GONE
     }
@@ -92,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // 5. التفريق بين ملف PDF والصورة بناءً على نوع URI
+                // التفريق بين ملف PDF والصورة بناءً على نوع URI
                 val result = withContext(Dispatchers.IO) {
                     val mimeType = contentResolver.getType(currentUri)
                     if (mimeType == "application/pdf") {
