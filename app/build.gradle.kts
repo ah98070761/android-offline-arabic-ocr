@@ -21,11 +21,9 @@ android {
             useSupportLibrary = true
         }
         
-        // ✅ التصحيح النهائي: استخدام كتلة abiFilters والـ include
+        // ✅ التصحيح النهائي للبناء: استخدام التعيين المباشر لـ mutableSetOf
         ndk {
-            abiFilters {
-                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64") 
-            }
+            abiFilters = mutableSetOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
 
@@ -50,7 +48,7 @@ android {
         compose = false 
     }
     packaging {
-        // 💡 إبقاء: استخدام وضع التغليف القديم للمكتبات الأصلية (لحماية Android 9)
+        // 💡 إبقاء: وضع التغليف القديم للمكتبات الأصلية (لحماية Android 9)
         jniLibs {
              useLegacyPackaging = true
         }
