@@ -16,8 +16,9 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    // ✅ التصحيح الذي يجب تطبيقه في MainActivity.kt:
-private val ocrManager = OcrManager(this)
+    
+    // ✅ تهيئة OcrManager يجب أن تكون هنا.
+    private val ocrManager = OcrManager(this)
     private var imageUri: Uri? = null
 
     // 1. Activity Launcher لاختيار الصور
@@ -30,7 +31,7 @@ private val ocrManager = OcrManager(this)
             binding.btnPerformOcr.text = getString(R.string.perform_ocr_image) // تحديث النص
         }
     }
-    
+
     // 2. Activity Launcher لاختيار ملفات PDF
     private val pickPdfLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -53,11 +54,12 @@ private val ocrManager = OcrManager(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        OcrManager.init(applicationContext)
+
+        // ❌ التصحيح: تم حذف السطر التالي الذي كان يسبب خطأ Unresolved reference: init
+        // OcrManager.init(applicationContext) 
 
         // تعديل مستمع النقر لزر اختيار الصور
         binding.btnSelectImage.setOnClickListener {
@@ -68,7 +70,7 @@ private val ocrManager = OcrManager(this)
         binding.btnCaptureImage.setOnClickListener {
             captureImageLauncher.launch(null) 
         }
-        
+
         binding.btnPerformOcr.setOnClickListener {
             performOcrProcess()
         }
@@ -98,7 +100,7 @@ private val ocrManager = OcrManager(this)
                         ocrManager.performOcr(currentUri)
                     }
                 }
-                
+
                 binding.tvOcrResult.text = result
 
             } catch (e: Exception) {
