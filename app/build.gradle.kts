@@ -1,3 +1,5 @@
+// app/build.gradle.kts
+
 plugins {
     id("com.android.application") 
     id("org.jetbrains.kotlin.android")
@@ -17,6 +19,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+        
+        // 💡 إضافة: تحديد نسخة NDK لتحسين التوافق مع المكتبات الأصلية
+        ndk {
+            abiFilters("armeabi-v7a", "arm64-v8a", "x86", "x86_64") 
         }
     }
 
@@ -43,6 +50,10 @@ android {
         compose = false 
     }
     packaging {
+        // 💡 إضافة: استخدام وضع التغليف القديم للمكتبات الأصلية (لحل مشاكل التوقف الفوري)
+        jniLibs {
+             useLegacyPackaging = true
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
