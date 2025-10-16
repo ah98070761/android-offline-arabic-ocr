@@ -2,11 +2,10 @@ package com.example.ocr
 
 import android.content.Context
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.arabic.ArabicTextRecognizerOptions // استيراد خيارات اللغة العربية
+import com.google.mlkit.vision.text.TextRecognizerOptions // استيراد الخيارات العامة والافتراضية
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
 import kotlinx.coroutines.withContext
@@ -15,25 +14,23 @@ import java.io.IOException
 // 💡 الآن OcrManager يقبل السياق (Context) في الباني
 class OcrManager(private val context: Context) {
 
-    // ✅ تهيئة ML Kit لاستخدام نموذج اللغة العربية
+    // ✅ التصحيح: استخدام الخيارات الافتراضية TextRecognizerOptions.DEFAULT_OPTIONS
+    // هذه الخيارات تدعم النص اللاتيني والعديد من النصوص غير اللاتينية (مثل العربية) عبر خدمات Google Play.
     private val recognizer = TextRecognition.getClient(
-        ArabicTextRecognizerOptions.Builder().build()
+        TextRecognizerOptions.DEFAULT_OPTIONS
     )
     private val TAG = "OcrManager"
 
-    // لا حاجة لـ init{} أو Companion Object لتحميل المكتبات أو نسخ ملفات اللغة.
-    
-    // ❌ إزالة دالة copyTessData()
-    // ❌ إزالة دالة performOcrOnPdf() (لأن ML Kit لا يدعمها مباشرة)
-    
+    // تم حذف init{} و ArabicTextRecognizerOptions، وحل مشكلة عدم العثور عليها
+
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
         try {
             // 1. إنشاء InputImage من URI باستخدام سياق التطبيق
             val image = InputImage.fromFilePath(context, imageUri)
-            
+
             // 2. معالجة الصورة باستخدام ML Kit وانتظار النتيجة
             val result = recognizer.process(image).await() 
-            
+
             val fullText = result.text.trim()
 
             if (fullText.isNullOrBlank()) {
@@ -47,6 +44,7 @@ class OcrManager(private val context: Context) {
             "فشل في تحميل الصورة: ${e.message}"
         } catch (e: Exception) {
             Log.e(TAG, "ML Kit OCR error: ${e.message}")
+            // ملاحظة: قد تحتاج خدمات Google Play إلى تنزيل النموذج أولاً.
             "فشل في معالجة OCR: ${e.message}"
         }
     }
@@ -56,6 +54,7 @@ class OcrManager(private val context: Context) {
     // يجب عليك استخدام PdfRenderer لتحويل كل صفحة إلى صورة (Bitmap)، 
     // ثم استدعاء performOcr(bitmap) لكل صورة.
     suspend fun performOcrOnPdf(pdfUri: Uri): String {
+        // يمكنك هنا تضمين كود معالجة PDF باستخدام PdfRenderer ثم استدعاء performOcr(Bitmap)
         return "وظيفة معالجة ملفات PDF غير مدعومة حاليًا في إعداد ML Kit هذا."
     }
 }
