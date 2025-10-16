@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.ocr"
     compileSdk = 34
-
+    // ... (بقية إعدادات android)
     defaultConfig {
         applicationId = "com.example.ocr"
         minSdk = 24
@@ -38,6 +38,13 @@ android {
     }
 }
 
+// ✅ الحل: أضف كتلة repositories هنا لضمان العثور على ML Kit
+repositories {
+    google()
+    mavenCentral()
+}
+
+
 dependencies {
 
     // Core Android Libraries
@@ -63,11 +70,11 @@ dependencies {
     kapt("androidx.room:room-compiler:$room_version")
     // دعم Coroutines لـ Room
     implementation("androidx.room:room-ktx:$room_version")
-    
+
     // 2. Google Mobile Ads SDK (AdMob)
     // إضافة مكتبة إعلانات Google Mobile
     implementation("com.google.android.gms:play-services-ads:23.1.0") 
-    
+
     // Test dependencies
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
