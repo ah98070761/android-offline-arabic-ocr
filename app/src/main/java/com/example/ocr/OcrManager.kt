@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions // 👈🏼 هذا السطر يحل المشكلة الحالية
+// ❌ تم إزالة import com.google.mlkit.vision.text.TextRecognizerOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
 import kotlinx.coroutines.withContext
@@ -14,10 +14,10 @@ import java.io.IOException
 // 💡 الآن OcrManager يقبل السياق (Context) في الباني
 class OcrManager(private val context: Context) {
 
-    // ✅ استخدام TextRecognizerOptions.DEFAULT_OPTIONS
-    private val recognizer = TextRecognition.getClient(
-        TextRecognizerOptions.DEFAULT_OPTIONS
-    )
+    // ✅ التصحيح: استدعاء getClient() بدون خيارات، وهو النمط الصحيح 
+    // للتبعية com.google.android.gms:play-services-mlkit-text-recognition
+    private val recognizer = TextRecognition.getClient()
+    
     private val TAG = "OcrManager"
 
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
