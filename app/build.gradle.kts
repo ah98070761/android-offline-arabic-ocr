@@ -1,4 +1,4 @@
-// app/build.gradle.kts
+// app/build.gradle.kts (التغييرات الرئيسية في defaultConfig و sourceSets)
 
 plugins {
     id("com.android.application") 
@@ -21,10 +21,10 @@ android {
             useSupportLibrary = true
         }
         
-        // ✅ التصحيح النهائي للبناء: استخدام addAll مع قائمة (Collection)
-        ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
-        }
+        // **إزالة كتلة ndk بالكامل**
+        // ndk {
+        //     abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+        // }
     }
 
     buildTypes {
@@ -48,13 +48,19 @@ android {
         compose = false 
     }
     packaging {
-        // 💡 إبقاء: وضع التغليف القديم للمكتبات الأصلية (لحماية Android 9)
+        // ✅ الإبقاء على حل مشكلة Android 9.0 (مهم)
         jniLibs {
              useLegacyPackaging = true
         }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    // 🌟 الخطوة الجديدة: ربط jniLibs بالمكتبات الأصلية لـ tess-two
+    sourceSets.getByName("main") {
+        jniLibs.srcDirs("src/main/jniLibs", 
+                       "libs") // أضف المسارات حيث قد تكون tess-two تضع مكتباتها الأصلية
     }
 }
 
