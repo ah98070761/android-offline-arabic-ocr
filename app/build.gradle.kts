@@ -1,4 +1,4 @@
-// app/build.gradle.kts (التغييرات الرئيسية في defaultConfig و sourceSets)
+// app/build.gradle.kts
 
 plugins {
     id("com.android.application") 
@@ -20,11 +20,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        
-        // **إزالة كتلة ndk بالكامل**
-        // ndk {
-        //     abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
-        // }
     }
 
     buildTypes {
@@ -47,20 +42,11 @@ android {
         viewBinding = true
         compose = false 
     }
+    // ❌ إزالة كتل packaging و sourceSets القديمة
     packaging {
-        // ✅ الإبقاء على حل مشكلة Android 9.0 (مهم)
-        jniLibs {
-             useLegacyPackaging = true
-        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
-    }
-
-    // 🌟 الخطوة الجديدة: ربط jniLibs بالمكتبات الأصلية لـ tess-two
-    sourceSets.getByName("main") {
-        jniLibs.srcDirs("src/main/jniLibs", 
-                       "libs") // أضف المسارات حيث قد تكون tess-two تضع مكتباتها الأصلية
     }
 }
 
@@ -72,8 +58,15 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    // إضافة لـ await() coroutine
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") 
+    
+    // ❌ إزالة تبعية tess-two القديمة:
+    // implementation("com.rmtheis:tess-two:9.1.0") 
 
-    implementation("com.rmtheis:tess-two:9.1.0")
+    // ✅ التبعيات الجديدة لـ Google ML Kit (التعرف على النص):
+    implementation("com.google.mlkit:text-recognition:16.0.0") // النموذج الأساسي (لاتيني)
+    implementation("com.google.mlkit:text-recognition-arabic:16.0.0") // النموذج للغة العربية
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
