@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions // ✅ هذا السطر ضروري لحل الخطأ الحالي
+import com.google.mlkit.vision.text.TextRecognizerOptions // ✅ الحل الحتمي لخطأ Unresolved reference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
 import kotlinx.coroutines.withContext
@@ -14,7 +14,7 @@ import java.io.IOException
 // 💡 الآن OcrManager يقبل السياق (Context) في الباني
 class OcrManager(private val context: Context) {
 
-    // استخدام TextRecognizerOptions.DEFAULT_OPTIONS سيعمل الآن
+    // ✅ استخدام TextRecognizerOptions.DEFAULT_OPTIONS
     private val recognizer = TextRecognition.getClient(
         TextRecognizerOptions.DEFAULT_OPTIONS
     )
