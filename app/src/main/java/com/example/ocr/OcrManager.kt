@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions // ✅ هذا السطر هو مفتاح الحل
+import com.google.mlkit.vision.text.TextRecognizerOptions // ✅ هذا السطر ضروري لحل الخطأ الحالي
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
 import kotlinx.coroutines.withContext
@@ -14,8 +14,7 @@ import java.io.IOException
 // 💡 الآن OcrManager يقبل السياق (Context) في الباني
 class OcrManager(private val context: Context) {
 
-    // ✅ التصحيح: استخدام الخيارات الافتراضية TextRecognizerOptions.DEFAULT_OPTIONS
-    // هذا سيعمل الآن لأن الكلاس TextRecognizerOptions أصبح مستورداً.
+    // استخدام TextRecognizerOptions.DEFAULT_OPTIONS سيعمل الآن
     private val recognizer = TextRecognition.getClient(
         TextRecognizerOptions.DEFAULT_OPTIONS
     )
@@ -46,7 +45,7 @@ class OcrManager(private val context: Context) {
         }
     }
 
-    // ملاحظة حول PDF:
+    // وظيفة معالجة PDF
     suspend fun performOcrOnPdf(pdfUri: Uri): String {
         return "وظيفة معالجة ملفات PDF غير مدعومة حاليًا في إعداد ML Kit هذا."
     }
