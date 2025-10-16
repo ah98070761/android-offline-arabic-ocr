@@ -5,21 +5,23 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-// ❌ تم إزالة import com.google.mlkit.vision.text.TextRecognizerOptions
+// تم إزالة import com.google.mlkit.vision.text.TextRecognizerOptions
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
 // 💡 الآن OcrManager يقبل السياق (Context) في الباني
-
 class OcrManager(private val context: Context) {
 
-    // ✅ يجب أن تكون التهيئة هكذا (مع الأقواس):
-    private val recognizer = TextRecognition.getClient() 
-    
+    // ✅ الحل لخطأ 'p0': استخدام by lazy لضمان تهيئة الكائن كاستدعاء دالة.
+    private val recognizer by lazy {
+        TextRecognition.getClient() 
+    }
+
     private val TAG = "OcrManager"
-    
+
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
         try {
             // 1. إنشاء InputImage من URI باستخدام سياق التطبيق
