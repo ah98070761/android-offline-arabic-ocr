@@ -21,9 +21,9 @@ android {
             useSupportLibrary = true
         }
         
-        // ✅ التصحيح النهائي للبناء: استخدام التعيين المباشر لـ mutableSetOf
+        // ✅ التصحيح النهائي: استخدام دالة addAll() على خاصية المجموعة
         ndk {
-            abiFilters = mutableSetOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            abiFilters.addAll("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
 
