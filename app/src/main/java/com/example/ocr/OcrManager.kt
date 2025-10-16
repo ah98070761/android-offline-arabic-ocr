@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions // استيراد الخيارات العامة والافتراضية
+import com.google.mlkit.vision.text.TextRecognizerOptions // ✅ تم إضافة هذا الاستيراد لحل المشكلة
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
 import kotlinx.coroutines.withContext
