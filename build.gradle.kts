@@ -7,10 +7,4 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.9.0" apply false
 }
 
-// 💡 إضافة كتل repositories هنا كإجراء احتياطي لضمان التعرف على ML Kit في المشاريع الفرعية
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// ❌ إزالة كتلة allprojects: لم تعد ضرورية وتسبب خطأً.
