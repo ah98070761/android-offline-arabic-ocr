@@ -1,8 +1,8 @@
-// app/build.gradle.kts
-
 plugins {
-    id("com.android.application") 
+    id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    // إضافة الإضافات المطلوبة لـ Room و Kotlin (kapt)
+    id("kotlin-kapt")
 }
 
 android {
@@ -17,18 +17,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
@@ -38,39 +32,44 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    // تفعيل ViewBinding للاستخدام في MainActivity
     buildFeatures {
         viewBinding = true
-        compose = false 
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
     }
 }
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
+    // Core Android Libraries
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.activity:activity-ktx:1.8.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+
+    // ML Kit for Arabic Text Recognition (Unbundled)
+    // التبعية الخاصة باللغة العربية
+    implementation("com.google.mlkit:text-recognition-arabic:16.0.0") 
+
+    // ML Kit Tasks-Ktx for Coroutine support
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0") 
+
+    // 1. Room - Database for Saving Extracted Text
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    // لتوليد الكود الخاص بـ Room (KAPT)
+    kapt("androidx.room:room-compiler:$room_version")
+    // دعم Coroutines لـ Room
+    implementation("androidx.room:room-ktx:$room_version")
     
-    // لإضافة await() coroutine
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") 
-
-    // ✅ التبعية الصحيحة والموثوقة للتعرف على النص (بما في ذلك اللغة العربية)
-    // نستخدم play-services-mlkit-text-recognition الذي يعمل عبر خدمات Google Play.
-    // الإصدار 19.0.1 هو أحدث إصدار مستقر تم التحقق منه.
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.1") 
-
-    // ❌ تم حذف com.google.mlkit:text-recognition و com.google.mlkit:text-recognition-arabic
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
+    // 2. Google Mobile Ads SDK (AdMob)
+    // إضافة مكتبة إعلانات Google Mobile
+    implementation("com.google.android.gms:play-services-ads:23.1.0") 
+    
+    // Test dependencies
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
