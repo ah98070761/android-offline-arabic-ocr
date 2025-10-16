@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions // ✅ الحل الحتمي لخطأ Unresolved reference
+import com.google.mlkit.vision.text.TextRecognizerOptions // 👈🏼 هذا السطر يحل المشكلة الحالية
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
 import kotlinx.coroutines.withContext
