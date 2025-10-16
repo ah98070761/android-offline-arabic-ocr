@@ -21,9 +21,9 @@ android {
             useSupportLibrary = true
         }
         
-        // ✅ التصحيح النهائي: استخدام دالة addAll() على خاصية المجموعة
+        // ✅ التصحيح النهائي للبناء: استخدام addAll مع قائمة (Collection)
         ndk {
-            abiFilters.addAll("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
         }
     }
 
