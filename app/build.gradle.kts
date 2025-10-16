@@ -65,8 +65,8 @@ dependencies {
     // implementation("com.rmtheis:tess-two:9.1.0") 
 
     // ✅ التبعيات الجديدة لـ Google ML Kit (التعرف على النص):
-    implementation("com.google.mlkit:text-recognition:16.0.0") // النموذج الأساسي (لاتيني)
-    implementation("com.google.mlkit:text-recognition-arabic:16.0.0") // النموذج للغة العربية
+    implementation("com.google.mlkit:text-recognition:19.0.0") // النموذج الأساسي (لاتيني)
+    implementation("com.google.mlkit:text-recognition-arabic:17.0.0") // النموذج للغة العربية
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
