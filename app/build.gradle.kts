@@ -58,12 +58,13 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     
-    // لإضافة await() coroutine
+    // إضافة لـ await() coroutine
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") 
 
-    // ✅ التبعيات المُصححة والنهائية لـ Google ML Kit:
-    implementation("com.google.mlkit:text-recognition:18.0.2")       // إصدار موثوق لـ text-recognition
-    implementation("com.google.mlkit:text-recognition-arabic:16.0.0") // إصدار موثوق لـ text-recognition-arabic
+    // ✅ الإصدارات المُصححة والنهائية لـ Google ML Kit:
+    implementation("com.google.mlkit:text-recognition:16.0.1")       
+    implementation("com.google.mlkit:text-recognition-arabic:16.0.1") 
+    // تم توحيد الإصدارات لضمان العثور عليها وتجنب التضارب.
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
