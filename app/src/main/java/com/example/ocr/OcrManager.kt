@@ -20,23 +20,40 @@ class OcrManager {
     private lateinit var datapath: String
     private val lang = "ara+eng" 
     private val tessBaseAPI = TessBaseAPI()
-    private var isTessInitialized = false // 💡 متغير جديد للتحقق من الحالة
+    private var isTessInitialized = false 
 
     companion object {
         private const val TAG = "OcrManager"
         private lateinit var appContext: Context
 
+        // 🌟 التصحيح 1: تحميل المكتبات الأصلية يدويًا قبل أي استخدام لها
+        init {
+            try {
+                // tess-two تتطلب تحميل هذه المكتبات
+                System.loadLibrary("pngt")
+                System.loadLibrary("lept")
+                System.loadLibrary("jpgt")
+                System.loadLibrary("tess")
+                Log.d(TAG, "Native libraries loaded successfully.")
+            } catch (e: UnsatisfiedLinkError) {
+                Log.e(TAG, "ERROR loading native Tesseract libraries: ${e.message}")
+            }
+        }
+
         fun init(context: Context) {
             appContext = context
+            // 💡 ملاحظة: يجب التأكد أن دالة init يتم استدعاؤها مرة واحدة فقط (مثلاً في Application class)
         }
     }
 
-    init {
+    // 🌟 التصحيح 2: التهيئة الآن تأخذ السياق (Context)
+    constructor(context: Context) {
+        appContext = context // تعيين السياق في الباني
         datapath = appContext.filesDir.absolutePath + "/tesseract/"
-        
+
         // 1. محاولة نسخ ملفات اللغة
         copyTessData()
-        
+
         val dataDir = File(datapath)
         if (!dataDir.exists() && !dataDir.mkdirs()) {
             Log.e(TAG, "Could not create directory $datapath")
@@ -44,24 +61,24 @@ class OcrManager {
 
         // 2. محاولة تهيئة Tesseract
         try {
+            // هذا الجزء هو الأكثر عرضة للانهيار إذا فشل نسخ الملف
             if (!tessBaseAPI.init(datapath, lang)) {
-                Log.e(TAG, "Initialization of Tesseract failed. Check logs for missing files.")
-                isTessInitialized = false // فشلت التهيئة
+                Log.e(TAG, "Initialization of Tesseract failed. Check logs for missing files at: $datapath/tessdata/")
+                isTessInitialized = false 
             } else {
                 Log.d(TAG, "Tesseract initialized successfully.")
-                isTessInitialized = true // نجحت التهيئة
+                isTessInitialized = true 
             }
         } catch (e: Exception) {
             Log.e(TAG, "Fatal error initializing Tesseract: ${e.message}")
             isTessInitialized = false
         }
     }
-    
+
     private fun copyTessData() {
-        // ... (هذه الوظيفة تبقى كما هي) ...
         val assetManager = appContext.assets
         val tessDataDir = File(datapath, "tessdata")
-        
+
         if (!tessDataDir.exists() && !tessDataDir.mkdirs()) {
              Log.e(TAG, "Could not create tessdata directory")
              return
@@ -80,6 +97,7 @@ class OcrManager {
                     }
                     Log.d(TAG, "Copied $filename successfully.")
                 } catch (e: IOException) {
+                    // إذا فشلت عملية النسخ، تحقق من أن الملفات موجودة في مجلد assets/tessdata
                     Log.e(TAG, "Failed to copy $filename: ${e.message}")
                 }
             }
@@ -87,11 +105,10 @@ class OcrManager {
     }
 
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
-        // 💡 التحقق من حالة التهيئة قبل الاستخدام
         if (!isTessInitialized) {
             return@withContext "خطأ: لم يتم تهيئة محرك OCR بنجاح. يرجى التأكد من وجود ملفات اللغة."
         }
-        
+        // ... (بقية الكود تبقى كما هي) ...
         try {
             val bitmap = MediaStore.Images.Media.getBitmap(appContext.contentResolver, imageUri)
             val processedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false) 
@@ -100,7 +117,7 @@ class OcrManager {
             val result = tessBaseAPI.utF8Text
             tessBaseAPI.clear()
             processedBitmap.recycle()
-            
+
             if (result.isNullOrBlank()) {
                 "لم يتم العثور على أي نص في الصورة."
             } else {
@@ -117,22 +134,20 @@ class OcrManager {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return@withContext "خطأ: ميزة قراءة PDF تتطلب Android 5.0 (API 21) أو أعلى."
         }
-        // 💡 التحقق من حالة التهيئة قبل الاستخدام
         if (!isTessInitialized) {
             return@withContext "خطأ: لم يتم تهيئة محرك OCR بنجاح. يرجى التأكد من وجود ملفات اللغة."
         }
-        
         // ... (بقية الكود تبقى كما هي) ...
         val fullOcrResult = StringBuilder()
         var pfd: ParcelFileDescriptor? = null
         var renderer: PdfRenderer? = null
-        
+
         try {
              pfd = appContext.contentResolver.openFileDescriptor(pdfUri, "r")
              renderer = PdfRenderer(pfd!!)
-            
+
             val pageCount = renderer.pageCount
-            
+
             for (i in 0 until pageCount) {
                 renderer.openPage(i).use { page ->
                     val width = page.width * 2
@@ -142,7 +157,7 @@ class OcrManager {
 
                     tessBaseAPI.setImage(bitmap)
                     val pageText = tessBaseAPI.utF8Text
-                    
+
                     fullOcrResult.append("--- الصفحة ${i + 1} ---\n")
                     fullOcrResult.append(pageText).append("\n\n")
 
