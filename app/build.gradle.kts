@@ -21,9 +21,11 @@ android {
             useSupportLibrary = true
         }
         
-        // ✅ تصحيح الكود: استخدام abiFilters.set(listOf(...)) لـ Kotlin DSL
+        // ✅ التصحيح النهائي: استخدام كتلة abiFilters والـ include
         ndk {
-            abiFilters.set(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")) 
+            abiFilters {
+                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64") 
+            }
         }
     }
 
@@ -48,7 +50,7 @@ android {
         compose = false 
     }
     packaging {
-        // 💡 إبقاء: استخدام وضع التغليف القديم للمكتبات الأصلية لحل مشاكل التوقف الفوري
+        // 💡 إبقاء: استخدام وضع التغليف القديم للمكتبات الأصلية (لحماية Android 9)
         jniLibs {
              useLegacyPackaging = true
         }
