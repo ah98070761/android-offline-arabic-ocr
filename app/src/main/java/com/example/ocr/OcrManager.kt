@@ -12,14 +12,14 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 
 // 💡 الآن OcrManager يقبل السياق (Context) في الباني
+
 class OcrManager(private val context: Context) {
 
-    // ✅ التصحيح: استدعاء getClient() بدون خيارات، وهو النمط الصحيح 
-    // للتبعية com.google.android.gms:play-services-mlkit-text-recognition
-    private val recognizer = TextRecognition.getClient()
+    // ✅ يجب أن تكون التهيئة هكذا (مع الأقواس):
+    private val recognizer = TextRecognition.getClient() 
     
     private val TAG = "OcrManager"
-
+    
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
         try {
             // 1. إنشاء InputImage من URI باستخدام سياق التطبيق
