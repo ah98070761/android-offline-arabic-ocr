@@ -1,6 +1,5 @@
 package com.example.ocr
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -9,105 +8,127 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.ocr.databinding.ActivityMainBinding
+import com.example.ocr.data.AppDatabase
+import com.example.ocr.data.OcrResult
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds // استيراد AdMob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * النشاط الرئيسي للتحكم في واجهة المستخدم، اختيار المحتوى، تشغيل OCR، وحفظ النتائج.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    
-    // ✅ تهيئة OcrManager يجب أن تكون هنا.
     private val ocrManager = OcrManager(this)
-    private var imageUri: Uri? = null
+    private var urisToProcess: List<Uri>? = null // لحفظ URIs المتعددة (صور أو PDF)
+    private lateinit var db: AppDatabase
+    private lateinit var mAdView : AdView // إعلان AdMob
 
-    // 1. Activity Launcher لاختيار الصور
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            imageUri = it
-            binding.imageView.setImageURI(it)
-            binding.tvOcrResult.setText(R.string.image_to_ocr)
+    // Activity Launcher لاختيار صور/ملفات PDF متعددة (GetMultipleContents)
+    private val pickContentLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri>? ->
+        uris?.let {
+            urisToProcess = it
+            binding.imageView.setImageURI(it.firstOrNull()) // عرض أول عنصر فقط
+            binding.tvOcrResult.text = "تم اختيار ${it.size} عنصر للمعالجة. اضغط 'تنفيذ'."
             binding.tvOcrResult.visibility = View.VISIBLE
-            binding.btnPerformOcr.text = getString(R.string.perform_ocr_image) // تحديث النص
-        }
-    }
-
-    // 2. Activity Launcher لاختيار ملفات PDF
-    private val pickPdfLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            imageUri = it // نستخدم imageUri مؤقتاً لتخزين URI ملف PDF
-            // ✅ تم الإصلاح: تم تغيير ic_pdf إلى ic_launcher_foreground كبديل موجود
-            binding.imageView.setImageResource(R.drawable.ic_launcher_foreground) 
-            binding.tvOcrResult.text = getString(R.string.pdf_ready_to_ocr)
-            binding.tvOcrResult.visibility = View.VISIBLE
-            binding.btnPerformOcr.text = getString(R.string.perform_ocr_pdf) // تحديث النص
-        }
-    }
-
-    private val captureImageLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
-        bitmap?.let {
-            binding.imageView.setImageBitmap(it)
-            imageUri = null 
-            Toast.makeText(this, "تم التقاط الصورة، يرجى اختيار صورة من المعرض لـ OCR الفعلي.", Toast.LENGTH_LONG).show()
+            binding.btnPerformOcr.text = "تنفيذ OCR على (${it.size}) عنصر"
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // ❌ التصحيح: تم حذف السطر التالي الذي كان يسبب خطأ Unresolved reference: init
-        // OcrManager.init(applicationContext) 
+        // 1. تهيئة قاعدة بيانات Room
+        db = AppDatabase.getDatabase(applicationContext)
 
-        // تعديل مستمع النقر لزر اختيار الصور
+        // 2. تهيئة AdMob SDK وعرض الإعلان
+        MobileAds.initialize(this) {}
+        mAdView = binding.adView 
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+        
+        // 3. مستمعي النقر
         binding.btnSelectImage.setOnClickListener {
-            // سنستخدم زر اختيار الصور لاختيار إما صور أو PDF
-            pickImageLauncher.launch("image/*|application/pdf")
-        }
-
-        binding.btnCaptureImage.setOnClickListener {
-            captureImageLauncher.launch(null) 
+            // السماح باختيار ملفات صور (*/*) و PDF (application/pdf)
+            pickContentLauncher.launch("image/*|application/pdf")
         }
 
         binding.btnPerformOcr.setOnClickListener {
             performOcrProcess()
         }
-
-        binding.tvOcrResult.visibility = View.GONE
+        
+        binding.btnDeleteAll.setOnClickListener {
+            deleteAllResults()
+        }
+        
+        // 4. مراقبة البيانات المحفوظة وعرض عددها
+        lifecycleScope.launch {
+            db.ocrResultDao().getAllResults().collect { results ->
+                binding.tvSavedResultsInfo.text = "النتائج المحفوظة حاليًا: ${results.size} عنصر."
+            }
+        }
     }
 
     private fun performOcrProcess() {
-        val currentUri = imageUri
-        if (currentUri == null) {
-            Toast.makeText(this, "يرجى اختيار صورة أو ملف PDF أولاً لإجراء OCR.", Toast.LENGTH_SHORT).show()
+        val currentUris = urisToProcess
+        if (currentUris.isNullOrEmpty()) {
+            Toast.makeText(this, "يرجى اختيار محتوى أولاً لإجراء OCR.", Toast.LENGTH_SHORT).show()
             return
         }
 
         binding.btnPerformOcr.isEnabled = false
-        binding.tvOcrResult.text = "جاري معالجة النص... يرجى الانتظار."
-        binding.tvOcrResult.visibility = View.VISIBLE
+        binding.tvOcrResult.text = "جاري معالجة ${currentUris.size} عنصر... قد يستغرق الأمر بعض الوقت."
 
         lifecycleScope.launch {
-            try {
-                // التفريق بين ملف PDF والصورة بناءً على نوع URI
-                val result = withContext(Dispatchers.IO) {
-                    val mimeType = contentResolver.getType(currentUri)
+            val combinedResult = StringBuilder()
+            var successCount = 0
+
+            for ((index, uri) in currentUris.withIndex()) {
+                binding.tvOcrResult.text = "جاري معالجة العنصر ${index + 1} من ${currentUris.size}..."
+
+                val resultText = withContext(Dispatchers.IO) {
+                    val mimeType = contentResolver.getType(uri)
+                    
                     if (mimeType == "application/pdf") {
-                        ocrManager.performOcrOnPdf(currentUri)
+                        ocrManager.performOcrOnPdf(uri)
                     } else {
-                        ocrManager.performOcr(currentUri)
+                        ocrManager.performOcr(uri)
                     }
                 }
+                
+                // حفظ كل نتيجة فوراً إذا لم تكن نص خطأ
+                if (resultText.isNotBlank() && !resultText.startsWith("فشل")) {
+                    db.ocrResultDao().insert(OcrResult(text = resultText))
+                    combinedResult.append("✅ تم استخراج وحفظ العنصر ${index + 1} بنجاح.\n")
+                    successCount++
+                } else {
+                    combinedResult.append("❌ فشل استخراج العنصر ${index + 1} أو كان فارغاً.\n")
+                }
+                
+                combinedResult.append("--- النص المستخرج ---\n")
+                combinedResult.append(resultText.take(200)).append("...\n\n") // عرض جزء صغير
 
-                binding.tvOcrResult.text = result
-
-            } catch (e: Exception) {
-                binding.tvOcrResult.text = "فشل في معالجة OCR: ${e.message}"
-            } finally {
-                binding.btnPerformOcr.isEnabled = true
             }
+
+            // عرض الملخص النهائي
+            binding.tvOcrResult.text = "تمت المعالجة بنجاح! تم حفظ ${successCount} عنصر.\n\n" + combinedResult.toString()
+            binding.btnPerformOcr.isEnabled = true
+            Toast.makeText(this@MainActivity, "تمت معالجة وحفظ ${successCount} عنصر بنجاح.", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    private fun deleteAllResults() {
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                db.ocrResultDao().deleteAll()
+            }
+            Toast.makeText(this@MainActivity, "تم حذف جميع النصوص المحفوظة.", Toast.LENGTH_SHORT).show()
         }
     }
 }
