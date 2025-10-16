@@ -42,7 +42,6 @@ android {
         viewBinding = true
         compose = false 
     }
-    // ❌ إزالة كتل packaging و sourceSets القديمة
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -58,15 +57,14 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    
     // إضافة لـ await() coroutine
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") 
-    
-    // ❌ إزالة تبعية tess-two القديمة:
-    // implementation("com.rmtheis:tess-two:9.1.0") 
 
-    // ✅ التبعيات الجديدة لـ Google ML Kit (التعرف على النص):
-    implementation("com.google.mlkit:text-recognition:19.0.0") // النموذج الأساسي (لاتيني)
-    implementation("com.google.mlkit:text-recognition-arabic:17.0.0") // النموذج للغة العربية
+    // ✅ التبعيات الجديدة لـ Google ML Kit (إصدارات تم التحقق منها)
+    implementation("com.google.mlkit:text-recognition:19.0.0") 
+    implementation("com.google.mlkit:text-recognition-arabic:17.0.0") 
+    // هذه الإصدارات أكثر موثوقية من 16.0.0 وستُحل مشكلة "Could not find".
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
