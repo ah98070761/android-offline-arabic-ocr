@@ -5,34 +5,27 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-// تم حذف الاستيراد الخاطئ
-
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions // ✅ ضروري
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await // لاستخدام .await() مع مهام ML Kit
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-// 💡 الآن OcrManager يقبل السياق (Context) في الباني
 class OcrManager(private val context: Context) {
 
-    // ✅ الحل لخطأ 'p0': استخدام by lazy لضمان تهيئة الكائن كاستدعاء دالة.
     private val recognizer by lazy {
-        TextRecognition.getClient() 
+        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) // ✅ الحل
     }
 
     private val TAG = "OcrManager"
 
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
         try {
-            // 1. إنشاء InputImage من URI باستخدام سياق التطبيق
             val image = InputImage.fromFilePath(context, imageUri)
-
-            // 2. معالجة الصورة باستخدام ML Kit وانتظار النتيجة
-            val result = recognizer.process(image).await() 
-
+            val result = recognizer.process(image).await()
             val fullText = result.text.trim()
 
-            if (fullText.isNullOrBlank()) {
+            if (fullText.isBlank()) {
                 "لم يتم العثور على أي نص في الصورة."
             } else {
                 "تمت عملية القراءة الضوئية بنجاح باستخدام ML Kit!\n--- نتيجة القراءة ---\n$fullText"
@@ -47,7 +40,6 @@ class OcrManager(private val context: Context) {
         }
     }
 
-    // وظيفة معالجة PDF
     suspend fun performOcrOnPdf(pdfUri: Uri): String {
         return "وظيفة معالجة ملفات PDF غير مدعومة حاليًا في إعداد ML Kit هذا."
     }
