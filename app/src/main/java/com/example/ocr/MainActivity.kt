@@ -16,7 +16,8 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val ocrManager = OcrManager()
+    // ✅ التصحيح الذي يجب تطبيقه في MainActivity.kt:
+private val ocrManager = OcrManager(this)
     private var imageUri: Uri? = null
 
     // 1. Activity Launcher لاختيار الصور
