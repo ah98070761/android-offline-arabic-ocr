@@ -10,7 +10,7 @@ interface OcrResultDao {
     @Insert
     suspend fun insert(result: OcrResult)
 
-    @Query("SELECT * FROM ocr_results ORDER BY id DESC")
+    @Query("SELECT * FROM ocr_results")
     fun getAllResults(): Flow<List<OcrResult>>
 
     @Query("DELETE FROM ocr_results")
