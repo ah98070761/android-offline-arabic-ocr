@@ -5,27 +5,29 @@ import android.graphics.*
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.annotation.WorkerThread
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.arabic.ArabicTextRecognizerOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import android.graphics.pdf.PdfRenderer
 import java.io.IOException
+import android.graphics.pdf.PdfRenderer
 
 class OcrManager(private val context: Context) {
 
     private val TAG = "OcrManager"
 
-    // ML Kit Text Recognition (يدعم العربية ضمن اللغات الافتراضية)
     private val recognizer by lazy {
-        TextRecognition.getClient()
+        TextRecognition.getClient(ArabicTextRecognizerOptions.DEFAULT_OPTIONS)
     }
 
     private fun preprocessBitmap(original: Bitmap): Bitmap {
         val grayBitmap = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(grayBitmap)
         val paint = Paint()
+
         val colorMatrix = ColorMatrix().apply { setSaturation(0f) }
         val contrast = 1.4f
         val brightness = -30f
@@ -49,9 +51,7 @@ class OcrManager(private val context: Context) {
             val preprocessed = preprocessBitmap(bitmap)
             val image = InputImage.fromBitmap(preprocessed, 0)
             val result = recognizer.process(image).await()
-            val fullText = result.text.trim()
-            if (fullText.isBlank()) "⚠️ لم يتم العثور على أي نص في الصورة."
-            else fullText
+            result.text.trim().ifBlank { "⚠️ لم يتم العثور على أي نص في الصورة." }
         } catch (e: IOException) {
             Log.e(TAG, "فشل تحميل الصورة: ${e.message}")
             "❌ فشل تحميل الصورة: ${e.message}"
@@ -65,14 +65,10 @@ class OcrManager(private val context: Context) {
         val totalText = StringBuilder()
         var parcelFileDescriptor: ParcelFileDescriptor? = null
         var pdfRenderer: PdfRenderer? = null
-
         try {
             parcelFileDescriptor = context.contentResolver.openFileDescriptor(pdfUri, "r")
             if (parcelFileDescriptor == null) return@withContext "❌ فشل فتح ملف PDF."
-
             pdfRenderer = PdfRenderer(parcelFileDescriptor)
-            totalText.append("📘 بدأ تحليل ملف PDF (${pdfRenderer.pageCount} صفحة)\n\n")
-
             for (i in 0 until pdfRenderer.pageCount) {
                 val page = pdfRenderer.openPage(i)
                 val bitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
@@ -80,15 +76,11 @@ class OcrManager(private val context: Context) {
                 val processedBitmap = preprocessBitmap(bitmap)
                 val image = InputImage.fromBitmap(processedBitmap, 0)
                 val result = recognizer.process(image).await()
-                totalText.append("📄 صفحة ${i + 1}:\n")
-                totalText.append(result.text.trim()).append("\n\n")
+                totalText.append("📄 صفحة ${i + 1}:\n${result.text.trim()}\n\n")
                 page.close()
                 bitmap.recycle()
             }
-
-            if (totalText.isBlank()) "⚠️ لم يتم العثور على نص في ملف PDF."
-            else totalText.toString()
-
+            if (totalText.isBlank()) "⚠️ لم يتم العثور على نص في ملف PDF." else totalText.toString()
         } catch (e: Exception) {
             Log.e(TAG, "PDF OCR Error: ${e.message}")
             "❌ فشل في تحليل PDF: ${e.message}"
