@@ -5,14 +5,14 @@ import android.graphics.*
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.graphics.pdf.PdfRenderer
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.arabic.ArabicTextRecognizerOptions
+import com.google.mlkit.vision.text.TextRecognizerOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import android.graphics.pdf.PdfRenderer
 
 /**
  * 🔤 OcrManager:
@@ -23,9 +23,9 @@ class OcrManager(private val context: Context) {
 
     private val TAG = "OcrManager"
 
-    // ✅ مُهيئ OCR باللغة العربية
+    // ✅ مُهيئ OCR (يدعم العربية تلقائيًا ضمن DEFAULT_OPTIONS)
     private val recognizer by lazy {
-        TextRecognition.getClient(ArabicTextRecognizerOptions.Builder().build())
+        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
 
     /**
