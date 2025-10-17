@@ -42,10 +42,6 @@ android {
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
 
 dependencies {
 
