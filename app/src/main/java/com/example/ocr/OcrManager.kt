@@ -1,7 +1,11 @@
 package com.example.ocr
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -18,18 +22,19 @@ class OcrManager(private val context: Context) {
 
     private val TAG = "OcrManager"
 
-    // استخدام TextRecognizer العام من ML Kit
+    // استخدام TextRecognizer من ML Kit
     private val recognizer by lazy {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
 
+    // معالجة الصورة لتحسين دقة التعرف على النصوص
     private fun preprocessBitmap(original: Bitmap): Bitmap {
         val grayBitmap = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(grayBitmap)
         val paint = Paint()
 
+        // تحويل الصورة إلى تدرج رمادي وزيادة التباين
         val colorMatrix = ColorMatrix().apply { setSaturation(0f) }
-
         val contrast = 1.4f
         val brightness = -30f
         val contrastMatrix = ColorMatrix(
@@ -40,20 +45,26 @@ class OcrManager(private val context: Context) {
                 0f, 0f, 0f, 1f, 0f
             )
         )
-
         colorMatrix.postConcat(contrastMatrix)
         paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
         canvas.drawBitmap(original, 0f, 0f, paint)
         return grayBitmap
     }
 
+    // معالجة الصور لاستخراج النصوص (عربي/إنجليزي)
     suspend fun performOcr(imageUri: Uri): String = withContext(Dispatchers.IO) {
         try {
-            val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(imageUri))
+            val bitmap = FileUtility.uriToBitmap(context, imageUri)
+            if (bitmap == null) {
+                Log.e(TAG, "فشل تحميل الصورة من URI: $imageUri")
+                return@withContext "❌ فشل تحميل الصورة."
+            }
             val preprocessed = preprocessBitmap(bitmap)
             val image = InputImage.fromBitmap(preprocessed, 0)
             val result = recognizer.process(image).await()
             val fullText = result.text.trim()
+            bitmap.recycle()
+            preprocessed.recycle()
             if (fullText.isBlank()) "⚠️ لم يتم العثور على أي نص في الصورة."
             else fullText
         } catch (e: IOException) {
@@ -65,6 +76,7 @@ class OcrManager(private val context: Context) {
         }
     }
 
+    // معالجة ملفات PDF
     suspend fun performOcrOnPdf(pdfUri: Uri): String = withContext(Dispatchers.IO) {
         val totalText = StringBuilder()
         var parcelFileDescriptor: ParcelFileDescriptor? = null
@@ -90,6 +102,7 @@ class OcrManager(private val context: Context) {
 
                 page.close()
                 bitmap.recycle()
+                processedBitmap.recycle()
             }
 
             if (totalText.isBlank()) "⚠️ لم يتم العثور على نص في ملف PDF."
