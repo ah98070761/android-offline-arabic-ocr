@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.ocr"
-    compileSdk = 34
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.example.ocr"
-        minSdk = 23
-        targetSdk = 34
+        minSdk = 21
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
@@ -52,9 +52,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
 
     // Room
-    implementation("androidx.room:room-runtime:2.8.2")
-    kapt("androidx.room:room-compiler:2.8.2")
-    implementation("androidx.room:room-ktx:2.8.2")
+    implementation("androidx.room:room-runtime:2.5.2")
+    kapt("androidx.room:room-compiler:2.5.2")
+    implementation("androidx.room:room-ktx:2.5.2")
 
     // ML Kit Arabic OCR
     implementation("com.google.mlkit:text-recognition:16.0.1")
