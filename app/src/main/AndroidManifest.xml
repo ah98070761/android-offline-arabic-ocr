@@ -2,20 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 👇 الأذونات حسب إصدار Android -->
-    <!-- للأجهزة <= 32 -->
+    <!-- أذونات الوصول للصور/الملفات -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-
-    <!-- للأجهزة >= 33 -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" /> <!-- اختياري إذا أردت دعم الفيديو -->
-
-    <!-- إذن الكاميرا -->
+    
+    <!-- أذن استخدام الكاميرا -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- 💡 خيارات الكاميرا (اختياري) -->
-    <uses-feature 
-        android:name="android.hardware.camera" 
+    <!-- الكاميرا اختيارية -->
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="false" />
 
     <application
@@ -27,7 +23,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.OfflineArabicOcrApp"
-        tools:targetApi="33">
+        tools:targetApi="31">
 
         <activity
             android:name=".MainActivity"
