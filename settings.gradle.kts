@@ -1,5 +1,3 @@
-// settings.gradle.kts
-
 pluginManagement {
     repositories {
         google()
@@ -7,12 +5,13 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") } // إضافة مستودع JitPack
+        maven { url = uri("https://jitpack.io") } // إذا أردت استخدام JitPack
     }
 }
 
