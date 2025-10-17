@@ -9,11 +9,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()  // ضروري لمكتبات ML Kit و Android
+        google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") } // إذا استخدمت مكتبات من GitHub
     }
 }
 
-rootProject.name = "OfflineArabicOcrApp"
+rootProject.name = "android-offline-arabic-ocr"
 include(":app")
