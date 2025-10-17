@@ -9,7 +9,7 @@ captures/
 
 # Files for the build system
 .gradle/
-/local.properties
+local.properties
 .DS_Store
 /build/
 /app/build/
@@ -53,9 +53,5 @@ proguard-project.txt
 # Windows specific files
 Thumbs.db
 
-# Tesseract traineddata files downloaded from external sources (optional, if you don't want to commit them)
-# If you want to commit ara.traineddata as per README, do NOT uncomment the line below.
-# app/src/main/assets/tessdata/*.traineddata
-
-# Ignore Tesseract training data (tessdata)
+# Tesseract training data (tessdata)
 */tessdata/*.traineddata
