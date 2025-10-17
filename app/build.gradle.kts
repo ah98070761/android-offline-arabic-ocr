@@ -14,6 +14,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,15 +32,17 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
+
     buildFeatures {
         viewBinding = true
     }
 }
 
-// ❌ إزالة أي repositories هنا تمامًا
+// ❌ لا حاجة لإضافة أي repositories هنا، كل شيء في settings.gradle.kts
 
 dependencies {
 
@@ -54,7 +57,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
 
     // ML Kit Arabic OCR
-    implementation("com.google.mlkit:text-recognition-arabic:16.0.0")
+    implementation("com.google.mlkit:text-recognition-arabic:16.0.1") // آخر إصدار متاح
 
     // Room Database
     val room_version = "2.6.1"
@@ -65,7 +68,7 @@ dependencies {
     // Google Mobile Ads (AdMob)
     implementation("com.google.android.gms:play-services-ads:23.1.0")
 
-    // Testing
+    // Test dependencies
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
