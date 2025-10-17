@@ -9,9 +9,9 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
+        google()  // ضروري لمكتبات ML Kit و Android
         mavenCentral()
-        maven { url = uri("https://jitpack.io") } // إذا أردت استخدام JitPack
+        maven { url = uri("https://jitpack.io") } // إذا استخدمت مكتبات من GitHub
     }
 }
 
