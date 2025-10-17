@@ -14,7 +14,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -56,8 +55,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
 
-    // ML Kit Arabic OCR
-    implementation("com.google.mlkit:text-recognition-arabic:16.0.1") // آخر إصدار متاح
+    // ML Kit Arabic Text Recognition (Google Play Services)
+    implementation("com.google.android.gms:play-services-mlkit-text-recognition:16.1.0")
 
     // Room Database
     val room_version = "2.6.1"
