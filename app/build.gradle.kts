@@ -51,8 +51,9 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.0")
     kapt("androidx.room:room-compiler:2.6.0")
     implementation("androidx.room:room-ktx:2.6.0")
-    implementation("com.google.mlkit:text-recognition:16.0.1")
-    implementation("com.google.android.gms:play-services-ads:22.2.0") // اختياري، أزل إذا لم تستخدم AdMob
+    implementation("com.google.mlkit:text-recognition:16.0.1") // لدعم النصوص اللاتينية
+    implementation("com.google.mlkit:text-recognition-arabic:15.0.0") // لدعم النصوص العربية
+    implementation("com.google.android.gms:play-services-ads:22.2.0") // لـ AdMob
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     testImplementation("junit:junit:4.13.2")
