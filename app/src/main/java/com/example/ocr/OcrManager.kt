@@ -11,7 +11,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptionsInterface
+import com.google.mlkit.vision.text.TextRecognizerOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -24,7 +24,7 @@ class OcrManager(private val context: Context) {
 
     // استخدام TextRecognizer من ML Kit مع الخيارات الافتراضية لدعم اللغات المتعددة (عربي، إنجليزي، إلخ)
     private val recognizer by lazy {
-        TextRecognition.getClient(TextRecognizerOptionsInterface.DEFAULT_OPTIONS)
+        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
 
     // معالجة الصورة لتحسين دقة التعرف على النصوص
