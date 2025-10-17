@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private lateinit var mAdView: AdView
 
-    // اختيار محتوى متعدد (صور + PDF)
     private val pickContentLauncher = registerForActivityResult(
         ActivityResultContracts.GetMultipleContents()
     ) { uris: List<Uri>? ->
@@ -42,7 +41,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // طلب الأذونات
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
