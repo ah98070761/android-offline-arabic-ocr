@@ -57,7 +57,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.2")
 
     // ML Kit Arabic OCR
-    implementation("com.google.mlkit:text-recognition-arabic:16.0.1")
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 
     // AdMob
     implementation("com.google.android.gms:play-services-ads:22.2.0")
