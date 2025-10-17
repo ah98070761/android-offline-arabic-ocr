@@ -1,22 +1,31 @@
 package com.example.ocr
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.ocr.databinding.ActivityMainBinding
 import com.example.ocr.data.AppDatabase
 import com.example.ocr.data.OcrResult
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
 import android.util.Log
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private val ocrManager by lazy { OcrManager(this) }
     private var urisToProcess: List<Uri>? = null
     private lateinit var db: AppDatabase
+    private var lastOcrResult: String? = null // لتخزين آخر نتيجة OCR
     private val TAG = "MainActivity"
 
     private val pickContentLauncher = registerForActivityResult(
@@ -45,7 +55,6 @@ class MainActivity : AppCompatActivity() {
         val granted = permissions.values.all { it }
         if (!granted) {
             Toast.makeText(this, "الأذونات مطلوبة لاختيار الصور أو ملفات PDF.", Toast.LENGTH_LONG).show()
-            // إذا لم تُمنح الأذونات، يمكنك إما إغلاق التطبيق أو تعطيل بعض الوظائف
         } else {
             Toast.makeText(this, "تم منح الأذونات بنجاح.", Toast.LENGTH_SHORT).show()
         }
@@ -60,12 +69,9 @@ class MainActivity : AppCompatActivity() {
             // تهيئة قاعدة البيانات
             db = AppDatabase.getDatabase(applicationContext)
 
-            // تعطيل AdMob مؤقتًا لاختبار التعطل
-            /*
+            // إعادة تفعيل AdMob
             MobileAds.initialize(this) {}
-            mAdView = binding.adView
-            mAdView.loadAd(AdRequest.Builder().build())
-            */
+            binding.adView.loadAd(AdRequest.Builder().build())
 
             // التحقق من الأذونات
             checkPermissions()
@@ -81,6 +87,10 @@ class MainActivity : AppCompatActivity() {
 
             binding.btnPerformOcr.setOnClickListener {
                 performOcrProcess()
+            }
+
+            binding.btnSaveShare.setOnClickListener {
+                saveOrShareResult()
             }
 
             binding.btnDeleteAll.setOnClickListener {
@@ -107,6 +117,7 @@ class MainActivity : AppCompatActivity() {
         val permissions = mutableListOf<String>()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CAMERA)
@@ -118,6 +129,7 @@ class MainActivity : AppCompatActivity() {
         val permissions = mutableListOf<String>()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CAMERA)
@@ -166,7 +178,8 @@ class MainActivity : AppCompatActivity() {
                     combinedResult.append(resultText.take(200)).append("...\n\n")
                 }
 
-                binding.tvOcrResult.text = "تمت المعالجة! تم حفظ ${successCount} عنصر.\n\n" + combinedResult.toString()
+                lastOcrResult = combinedResult.toString() // تخزين النتيجة للحفظ أو المشاركة
+                binding.tvOcrResult.text = "تمت المعالجة! تم حفظ ${successCount} عنصر.\n\n" + lastOcrResult
                 binding.btnPerformOcr.isEnabled = true
                 Toast.makeText(this@MainActivity, "تمت معالجة وحفظ ${successCount} عنصر.", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
@@ -174,6 +187,57 @@ class MainActivity : AppCompatActivity() {
                 binding.tvOcrResult.text = "خطأ في معالجة OCR: ${e.message}"
                 binding.btnPerformOcr.isEnabled = true
                 Toast.makeText(this@MainActivity, "خطأ في معالجة OCR: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun saveOrShareResult() {
+        val resultText = lastOcrResult
+        if (resultText.isNullOrBlank()) {
+            Toast.makeText(this, "لا توجد نتائج للحفظ أو المشاركة. قم بإجراء OCR أولاً.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!hasPermissions()) {
+            Toast.makeText(this, "يرجى منح إذن التخزين لحفظ النتائج.", Toast.LENGTH_SHORT).show()
+            checkPermissions()
+            return
+        }
+
+        lifecycleScope.launch {
+            try {
+                // حفظ النص كملف نصي
+                val fileName = "OCR_Result_${SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())}.txt"
+                val file = File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName)
+                withContext(Dispatchers.IO) {
+                    FileOutputStream(file).use { output ->
+                        output.write(resultText.toByteArray())
+                    }
+                }
+
+                // إنشاء URI للملف باستخدام FileProvider
+                val fileUri = FileProvider.getUriForFile(
+                    this@MainActivity,
+                    "${packageName}.provider",
+                    file
+                )
+
+                // إعداد Intent للمشاركة
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_STREAM, fileUri)
+                    putExtra(Intent.EXTRA_TEXT, resultText)
+                    putExtra(Intent.EXTRA_SUBJECT, "نتائج OCR")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                // بدء نشاط المشاركة
+                startActivity(Intent.createChooser(shareIntent, "حفظ أو مشاركة نتائج OCR"))
+
+                Toast.makeText(this@MainActivity, "تم حفظ الملف في ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                Log.e(TAG, "خطأ في حفظ أو مشاركة النتائج: ${e.message}", e)
+                Toast.makeText(this@MainActivity, "خطأ في حفظ أو مشاركة النتائج: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
