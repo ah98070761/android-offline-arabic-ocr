@@ -11,7 +11,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions
+import com.google.mlkit.vision.text.TextRecognizerOptionsInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -22,9 +22,9 @@ class OcrManager(private val context: Context) {
 
     private val TAG = "OcrManager"
 
-    // استخدام TextRecognizer من ML Kit
+    // استخدام TextRecognizer من ML Kit مع الخيارات الافتراضية لدعم اللغات المتعددة (عربي، إنجليزي، إلخ)
     private val recognizer by lazy {
-        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        TextRecognition.getClient(TextRecognizerOptionsInterface.DEFAULT_OPTIONS)
     }
 
     // معالجة الصورة لتحسين دقة التعرف على النصوص
@@ -32,8 +32,6 @@ class OcrManager(private val context: Context) {
         val grayBitmap = Bitmap.createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(grayBitmap)
         val paint = Paint()
-
-        // تحويل الصورة إلى تدرج رمادي وزيادة التباين
         val colorMatrix = ColorMatrix().apply { setSaturation(0f) }
         val contrast = 1.4f
         val brightness = -30f
