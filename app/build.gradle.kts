@@ -52,9 +52,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
 
     // Room
-    implementation("androidx.room:room-runtime:2.5.2")
-    kapt("androidx.room:room-compiler:2.5.2")
-    implementation("androidx.room:room-ktx:2.5.2")
+    implementation("androidx.room:room-runtime:2.6.0")
+    kapt("androidx.room:room-compiler:2.6.0")
+    implementation("androidx.room:room-ktx:2.6.0")
 
     // ML Kit Arabic OCR
     implementation("com.google.mlkit:text-recognition:16.0.1")
