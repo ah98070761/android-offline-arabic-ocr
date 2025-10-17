@@ -11,9 +11,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.ocr.databinding.ActivityMainBinding
 import com.example.ocr.data.AppDatabase
 import com.example.ocr.data.OcrResult
-import com.example.ocr.databinding.ActivityMainBinding
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private lateinit var mAdView: AdView
 
+    // اختيار محتوى متعدد (صور + PDF)
     private val pickContentLauncher = registerForActivityResult(
         ActivityResultContracts.GetMultipleContents()
     ) { uris: List<Uri>? ->
@@ -41,12 +42,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // طلب الأذونات
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val granted = permissions.all { it.value }
+        val granted = permissions.values.all { it }
         if (!granted) {
-            Toast.makeText(this, "يجب منح الأذونات لتشغيل التطبيق.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "الأذونات مطلوبة لتشغيل التطبيق.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         mAdView = binding.adView
         mAdView.loadAd(AdRequest.Builder().build())
 
-        checkAndRequestPermissions()
+        checkPermissions()
 
         binding.btnSelectImage.setOnClickListener {
             pickContentLauncher.launch("image/*|application/pdf")
@@ -82,12 +84,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkAndRequestPermissions() {
+    private fun checkPermissions() {
         val permissions = mutableListOf<String>()
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        } else {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CAMERA)
@@ -100,12 +102,12 @@ class MainActivity : AppCompatActivity() {
     private fun performOcrProcess() {
         val currentUris = urisToProcess
         if (currentUris.isNullOrEmpty()) {
-            Toast.makeText(this, "يرجى اختيار محتوى أولاً لإجراء OCR.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "يرجى اختيار محتوى أولاً.", Toast.LENGTH_SHORT).show()
             return
         }
 
         binding.btnPerformOcr.isEnabled = false
-        binding.tvOcrResult.text = "جاري معالجة ${currentUris.size} عنصر... قد يستغرق الأمر بعض الوقت."
+        binding.tvOcrResult.text = "جاري معالجة ${currentUris.size} عنصر..."
 
         lifecycleScope.launch {
             val combinedResult = StringBuilder()
@@ -128,16 +130,16 @@ class MainActivity : AppCompatActivity() {
                     combinedResult.append("✅ تم استخراج وحفظ العنصر ${index + 1} بنجاح.\n")
                     successCount++
                 } else {
-                    combinedResult.append("❌ فشل استخراج العنصر ${index + 1} أو كان فارغاً.\n")
+                    combinedResult.append("❌ فشل استخراج العنصر ${index + 1}.\n")
                 }
 
                 combinedResult.append("--- النص المستخرج ---\n")
                 combinedResult.append(resultText.take(200)).append("...\n\n")
             }
 
-            binding.tvOcrResult.text = "تمت المعالجة بنجاح! تم حفظ ${successCount} عنصر.\n\n$combinedResult"
+            binding.tvOcrResult.text = "تمت المعالجة! تم حفظ ${successCount} عنصر.\n\n" + combinedResult.toString()
             binding.btnPerformOcr.isEnabled = true
-            Toast.makeText(this@MainActivity, "تمت معالجة وحفظ ${successCount} عنصر بنجاح.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity, "تمت معالجة وحفظ ${successCount} عنصر.", Toast.LENGTH_LONG).show()
         }
     }
 
