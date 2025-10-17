@@ -1,14 +1,13 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // إضافة الإضافات المطلوبة لـ Room و Kotlin (kapt)
     id("kotlin-kapt")
 }
 
 android {
     namespace = "com.example.ocr"
     compileSdk = 34
-    // ... (بقية إعدادات android)
+
     defaultConfig {
         applicationId = "com.example.ocr"
         minSdk = 24
@@ -32,18 +31,18 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-    // تفعيل ViewBinding للاستخدام في MainActivity
     buildFeatures {
         viewBinding = true
     }
 }
 
-// ✅ الحل: أضف كتلة repositories هنا لضمان العثور على ML Kit
+// 🛑 قم بإزالة كتلة repositories التالية بالكامل
+/*
 repositories {
     google()
     mavenCentral()
 }
-
+*/
 
 dependencies {
 
@@ -57,7 +56,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
     // ML Kit for Arabic Text Recognition (Unbundled)
-    // التبعية الخاصة باللغة العربية
     implementation("com.google.mlkit:text-recognition-arabic:16.0.0") 
 
     // ML Kit Tasks-Ktx for Coroutine support
@@ -66,13 +64,10 @@ dependencies {
     // 1. Room - Database for Saving Extracted Text
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
-    // لتوليد الكود الخاص بـ Room (KAPT)
     kapt("androidx.room:room-compiler:$room_version")
-    // دعم Coroutines لـ Room
     implementation("androidx.room:room-ktx:$room_version")
 
     // 2. Google Mobile Ads SDK (AdMob)
-    // إضافة مكتبة إعلانات Google Mobile
     implementation("com.google.android.gms:play-services-ads:23.1.0") 
 
     // Test dependencies
