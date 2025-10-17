@@ -8,7 +8,6 @@ import android.util.Log
 import android.graphics.pdf.PdfRenderer
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -23,9 +22,9 @@ class OcrManager(private val context: Context) {
 
     private val TAG = "OcrManager"
 
-    // ✅ مُهيئ OCR (يدعم العربية تلقائيًا ضمن DEFAULT_OPTIONS)
+    // ✅ مُهيئ OCR (يدعم العربية تلقائيًا)
     private val recognizer by lazy {
-        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        TextRecognition.getClient()
     }
 
     /**
